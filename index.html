@@ -16,8 +16,8 @@
     }
     
     html, body {
-      background-color: var(--tg-theme-bg-color, #f4f4f5);
-      color: #000000;
+      background-color: #f4f4f5 !important;
+      color: #000000 !important;
       margin: 0;
       padding: 0;
       width: 100%;
@@ -39,8 +39,8 @@
     }
 
     .status-bar {
-      background: #ffffff;
-      color: #111827;
+      background: #ffffff !important;
+      color: #111827 !important;
       padding: 10px 12px;
       border-radius: 12px;
       font-size: 0.85rem;
@@ -62,8 +62,8 @@
       flex: 1;
       padding: 10px 4px;
       border: 1px solid #e5e7eb;
-      background: #ffffff;
-      color: #374151;
+      background: #ffffff !important;
+      color: #374151 !important;
       border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
@@ -73,9 +73,9 @@
     }
 
     .tab-btn.active {
-      background: var(--tg-theme-button-color, #2563eb);
-      color: var(--tg-theme-button-text-color, #ffffff);
-      border-color: var(--tg-theme-button-color, #2563eb);
+      background: #2563eb !important;
+      color: #ffffff !important;
+      border-color: #2563eb !important;
     }
 
     .days-grid {
@@ -87,9 +87,9 @@
 
     .day-btn {
       padding: 10px 0;
-      border: 1px solid var(--tg-theme-button-color, #2563eb);
-      background: #ffffff;
-      color: var(--tg-theme-button-color, #2563eb);
+      border: 1px solid #2563eb;
+      background: #ffffff !important;
+      color: #2563eb !important;
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
@@ -98,18 +98,17 @@
     }
 
     .day-btn.active {
-      background: var(--tg-theme-button-color, #2563eb);
-      color: var(--tg-theme-button-text-color, #ffffff);
+      background: #2563eb !important;
+      color: #ffffff !important;
     }
 
-    /* Карточки с четким черным текстом */
     .card {
-      border: 1px solid #e5e7eb;
+      border: 1px solid #e5e7eb !important;
       border-radius: 14px;
       padding: 14px;
       margin-bottom: 10px;
-      background: #ffffff;
-      color: #111827;
+      background: #ffffff !important;
+      color: #111827 !important;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     }
 
@@ -125,34 +124,27 @@
     .para-num {
       font-weight: 700;
       font-size: 0.95rem;
-      color: #111827;
+      color: #111827 !important;
     }
 
     .time-badge {
       font-size: 0.8rem;
-      background: #f3f4f6;
+      background: #f3f4f6 !important;
       padding: 4px 8px;
       border-radius: 8px;
       font-weight: 600;
-      color: #374151;
-    }
-
-    /* Главное название предмета — яркий черный цвет */
-    .subject {
-      font-weight: 800;
-      font-size: 1.1rem;
-      margin-bottom: 8px;
-      color: #000000 !important;
+      color: #374151 !important;
     }
 
     .meta-info {
       font-size: 0.875rem;
       line-height: 1.4;
-      color: #374151;
+      color: #374151 !important;
     }
 
     .meta-info div {
       margin-top: 4px;
+      color: #374151 !important;
     }
 
     .badge-type {
@@ -164,14 +156,14 @@
       font-weight: 700;
     }
 
-    .type-1 { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
-    .type-2 { background: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
-    .type-0 { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .type-1 { background: #dbeafe !important; color: #1e40af !important; border: 1px solid #bfdbfe; }
+    .type-2 { background: #f3e8ff !important; color: #6b21a8 !important; border: 1px solid #e9d5ff; }
+    .type-0 { background: #dcfce7 !important; color: #166534 !important; border: 1px solid #bbf7d0; }
 
     .empty-state {
       text-align: center;
       padding: 40px 10px;
-      color: #6b7280;
+      color: #6b7280 !important;
       font-size: 0.95rem;
     }
   </style>
@@ -205,8 +197,6 @@
   if (tg) {
     tg.ready();
     tg.expand();
-    if (tg.setHeaderColor) tg.setHeaderColor('secondary_bg_color');
-    if (tg.setBackgroundColor) tg.setBackgroundColor('bg_color');
     tg.onEvent('viewportChanged', () => tg.expand());
   }
 
@@ -361,16 +351,17 @@
       else if (item.type === 2) typeBadge = '<span class="badge-type type-2">Знаменатель</span>';
       else typeBadge = '<span class="badge-type type-0">Каждую неделю</span>';
 
+      /* ИНЛАЙН СТИЛИ ДЛЯ ЦВЕТА ТЕКСТА (ЖЕСТКИЙ ФИКС) */
       html += `
-        <div class="card">
+        <div class="card" style="background:#ffffff !important;">
           <div class="card-header">
-            <span class="para-num">Пара №${item.пара}</span>
-            <span class="time-badge">🕐 ${getTime(item.пара)}</span>
+            <span class="para-num" style="color:#111827 !important;">Пара №${item.пара}</span>
+            <span class="time-badge" style="color:#374151 !important; background:#f3f4f6 !important;">🕐 ${getTime(item.пара)}</span>
           </div>
-          <div class="subject">${item.sub}</div>
-          <div class="meta-info">
-            <div>👩‍🏫 ${item.teacher}</div>
-            <div>🚪 Кабинет: <strong>${item.room}</strong></div>
+          <div style="color:#000000 !important; font-weight:800; font-size:1.1rem; margin-bottom:8px;">${item.sub}</div>
+          <div class="meta-info" style="color:#374151 !important;">
+            <div style="color:#374151 !important;">👩‍🏫 ${item.teacher}</div>
+            <div style="color:#374151 !important;">🚪 Кабинет: <strong style="color:#000000 !important;">${item.room}</strong></div>
             <div>${typeBadge}</div>
           </div>
         </div>
@@ -385,15 +376,15 @@
     let html = '';
     EXAMS.forEach(exam => {
       html += `
-        <div class="card" style="border-left: 4px solid var(--tg-theme-button-color, #2563eb);">
+        <div class="card" style="border-left: 4px solid #2563eb !important; background:#ffffff !important;">
           <div class="card-header">
-            <span class="para-num">📅 ${exam.date}</span>
-            <span class="time-badge">🕐 ${exam.time}</span>
+            <span class="para-num" style="color:#111827 !important;">📅 ${exam.date}</span>
+            <span class="time-badge" style="color:#374151 !important; background:#f3f4f6 !important;">🕐 ${exam.time}</span>
           </div>
-          <div class="subject">${exam.sub}</div>
-          <div class="meta-info">
-            <div>👨‍🏫 Препод: ${exam.teacher}</div>
-            <div>📍 Локация: <strong>${exam.room}</strong></div>
+          <div style="color:#000000 !important; font-weight:800; font-size:1.1rem; margin-bottom:8px;">${exam.sub}</div>
+          <div class="meta-info" style="color:#374151 !important;">
+            <div style="color:#374151 !important;">👨‍🏫 Препод: ${exam.teacher}</div>
+            <div style="color:#374151 !important;">📍 Локация: <strong style="color:#000000 !important;">${exam.room}</strong></div>
           </div>
         </div>
       `;
