@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Расписание</title>
 
-  <!-- Подключение Telegram Web App SDK -->
+  <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
@@ -25,7 +25,6 @@
       overflow-x: hidden;
     }
 
-    /* Главный контейнер с адаптивными безопасными отступами */
     .app-wrapper {
       padding-top: calc(var(--tg-content-safe-area-inset-top, env(safe-area-inset-top, 20px)) + 16px);
       padding-bottom: calc(var(--tg-content-safe-area-inset-bottom, env(safe-area-inset-bottom, 20px)) + 16px);
@@ -184,10 +183,10 @@
     </div>
 
     <div class="days-grid" id="daysGrid">
-      <button class="day-btn" onclick="selectDay('Понедельник', this)">ПН</button>
-      <button class="day-btn" onclick="selectDay('Вторник', this)">ВТ</button>
-      <button class="day-btn" onclick="selectDay('Среда', this)">СР</button>
-      <button class="day-btn" onclick="selectDay('Четверг', this)">ЧТ</button>
+      <button class="day-btn" id="btn-ПН" onclick="selectDay('Понедельник', this)">ПН</button>
+      <button class="day-btn" id="btn-ВТ" onclick="selectDay('Вторник', this)">ВТ</button>
+      <button class="day-btn" id="btn-СР" onclick="selectDay('Среда', this)">СР</button>
+      <button class="day-btn" id="btn-ЧТ" onclick="selectDay('Четверг', this)">ЧТ</button>
     </div>
 
     <div id="scheduleContainer"></div>
@@ -195,30 +194,16 @@
 </div>
 
 <script>
-  // Инициализация Telegram Mini App
   const tg = window.Telegram ? window.Telegram.WebApp : null;
 
   if (tg) {
     tg.ready();
     tg.expand();
-
-    if (tg.isExpanded) {
-      document.body.classList.add('is-expanded');
-    }
-    
-    if (tg.setHeaderColor) {
-      tg.setHeaderColor('secondary_bg_color');
-    }
-    if (tg.setBackgroundColor) {
-      tg.setBackgroundColor('bg_color');
-    }
-
-    tg.onEvent('viewportChanged', () => {
-      tg.expand();
-    });
+    if (tg.setHeaderColor) tg.setHeaderColor('secondary_bg_color');
+    if (tg.setBackgroundColor) tg.setBackgroundColor('bg_color');
+    tg.onEvent('viewportChanged', () => tg.expand());
   }
 
-  // Данные расписания
   const SCHEDULE = {
     'Понедельник': [
       {'пара': '1', 'sub': 'Политология (Сем)', 'teacher': 'Толеуова М. Ө.', 'room': '1к232', 'type': 2},
@@ -279,20 +264,19 @@
   }
 
   let currentMode = 'current';
+  let selectedDay = 'Понедельник';
 
-  // В JS getDay() возвращает: 0 - Воскресенье, 1 - Понедельник, 2 - Вторник, 3 - Среда, 4 - Четверг, 5 - Пятница, 6 - Суббота
-  const daysMap = [
-    'Понедельник', // 0 (Вс) -> Понедельник
-    'Понедельник', // 1 (Пн)
-    'Вторник',     // 2 (Вт)
-    'Среда',       // 3 (Ср)
-    'Четверг',     // 4 (Чт)
-    'Понедельник', // 5 (Пт) -> Понедельник
-    'Понедельник'  // 6 (Сб) -> Понедельник
-  ];
-  
-  const todayIndex = new Date().getDay();
-  let selectedDay = daysMap[todayIndex];
+  // Логика автоматического определения дня недели (ПН, ВТ, СР, ЧТ)
+  function detectToday() {
+    const dayIndex = new Date().getDay(); // 0 - Вск, 1 - Пн, 2 - Вт, 3 - Ср, 4 - Чт, 5 - Пт, 6 - Суб
+    switch (dayIndex) {
+      case 1: selectedDay = 'Понедельник'; break;
+      case 2: selectedDay = 'Вторник'; break;
+      case 3: selectedDay = 'Среда'; break;
+      case 4: selectedDay = 'Четверг'; break;
+      default: selectedDay = 'Понедельник'; break; // Для ПТ, СБ, ВС отрываем Понедельник
+    }
+  }
 
   function getShortDayName(fullDay) {
     const shortNames = {
@@ -337,16 +321,17 @@
     updateStatusBar();
   }
 
-  function selectDay(dayName, btn) {
+  function selectDay(dayName, btnElement) {
     selectedDay = dayName;
     
-    document.querySelectorAll('.day-btn').forEach(b => {
-      if (b.textContent.trim() === getShortDayName(dayName)) {
-        b.classList.add('active');
-      } else {
-        b.classList.remove('active');
-      }
-    });
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+    if (btnElement) {
+      btnElement.classList.add('active');
+    } else {
+      const shortName = getShortDayName(dayName);
+      const targetBtn = document.getElementById(`btn-${shortName}`);
+      if (targetBtn) targetBtn.classList.add('active');
+    }
 
     renderSchedule();
   }
@@ -411,20 +396,11 @@
     container.innerHTML = html;
   }
 
+  // Запуск при старте
   document.addEventListener('DOMContentLoaded', () => {
+    detectToday(); // Определяем какой день СЕГОДНЯ
     updateStatusBar();
-
-    // Автоматическая подсветка кнопки текущего дня
-    const shortName = getShortDayName(selectedDay);
-    document.querySelectorAll('.day-btn').forEach(btn => {
-      if (btn.textContent.trim() === shortName) {
-        btn.classList.add('active');
-      } else {
-        btn.classList.remove('active');
-      }
-    });
-
-    renderSchedule();
+    selectDay(selectedDay, null); // Выбираем этот день и его кнопку
   });
 </script>
 </body>
