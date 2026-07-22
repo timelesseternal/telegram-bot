@@ -19,7 +19,7 @@
 
     try {
       // Подставь сюда адрес твоего запущенного API (или ngrok-ссылку)
-      const response = await fetch(`http://localhost:8000/api/schedule/${encodeURIComponent(dayName)}`);
+      const response = await fetch(`https://nickname-crib-feel.ngrok-free.dev/api/schedule/${encodeURIComponent(dayName)}`);
       const items = await response.json();
 
       if (!items || items.length === 0) {
