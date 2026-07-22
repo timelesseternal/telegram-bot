@@ -1,88 +1,352 @@
-<!-- Кнопки дней недели -->
-<div class="days-tabs">
-  <button class="day-btn active" onclick="selectDay('Понедельник', this)">ПН</button>
-  <button class="day-btn" onclick="selectDay('Вторник', this)">ВТ</button>
-  <button class="day-btn" onclick="selectDay('Среда', this)">СР</button>
-  <button class="day-btn" onclick="selectDay('Четверг', this)">ЧТ</button>
-  <button class="day-btn" onclick="selectDay('Пятница', this)">ПТ</button>
-  <button class="day-btn" onclick="selectDay('Суббота', this)">СБ</button>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Расписание занятий</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 15px;
+      color: #333;
+    }
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    h2 {
+      text-align: center;
+      margin-top: 0;
+      color: #1a1a1a;
+      font-size: 1.3rem;
+    }
+    .status-bar {
+      background: #eef2ff;
+      color: #3730a3;
+      padding: 10px 14px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #e0e0e0;
+      background: #f8f9fa;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .tab-btn.active {
+      background: #2563eb;
+      color: white;
+      border-color: #2563eb;
+    }
+    .days-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+    .day-btn {
+      padding: 10px;
+      border: 1px solid #2563eb;
+      background: #fff;
+      color: #2563eb;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .day-btn.active {
+      background: #2563eb;
+      color: #fff;
+    }
+    .card {
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #fff;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #f3f4f6;
+      padding-bottom: 8px;
+      margin-bottom: 8px;
+    }
+    .para-num {
+      font-weight: bold;
+      color: #111827;
+    }
+    .time-badge {
+      font-size: 0.8rem;
+      background: #f3f4f6;
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #4b5563;
+      font-weight: 600;
+    }
+    .subject {
+      font-weight: 700;
+      font-size: 1rem;
+      color: #1f2937;
+      margin-bottom: 6px;
+    }
+    .meta-info {
+      font-size: 0.85rem;
+      color: #6b7280;
+    }
+    .meta-info div {
+      margin-top: 4px;
+    }
+    .badge-type {
+      display: inline-block;
+      margin-top: 6px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .type-1 { background: #dbeafe; color: #1e40af; } /* Числитель */
+    .type-2 { background: #f3e8ff; color: #6b21a8; } /* Знаменатель */
+    .type-0 { background: #dcfce7; color: #166534; } /* Каждую неделю */
+    .empty-state {
+      text-align: center;
+      padding: 30px 10px;
+      color: #9ca3af;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h2>📅 Расписание занятий</h2>
+  
+  <div class="status-bar" id="statusBar">
+    Загрузка...
+  </div>
+
+  <!-- Переключатель недели -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" id="tabCurrent" onclick="switchWeek('current')">Текущая неделя</button>
+    <button class="tab-btn" id="tabNext" onclick="switchWeek('next')">Следующая неделя</button>
+    <button class="tab-btn" id="tabExams" onclick="switchWeek('exams')">📝 Экзамены</button>
+  </div>
+
+  <!-- Кнопки дней (скрываются на вкладке экзаменов) -->
+  <div class="days-grid" id="daysGrid">
+    <button class="day-btn active" onclick="selectDay('Понедельник', this)">ПН</button>
+    <button class="day-btn" onclick="selectDay('Вторник', this)">ВТ</button>
+    <button class="day-btn" onclick="selectDay('Среда', this)">СР</button>
+    <button class="day-btn" onclick="selectDay('Четверг', this)">ЧТ</button>
+  </div>
+
+  <!-- Контейнер вывода пар -->
+  <div id="scheduleContainer"></div>
 </div>
 
-<div id="schedule"></div>
-
 <script>
-  async function selectDay(dayName, btn) {
-    // Подсветка активной кнопки
-    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
+  // ================= 1. БАЗА ДАННЫХ (В JS) =================
+  const SCHEDULE = {
+    'Понедельник': [
+      {'пара': '1', 'sub': 'Политология (Сем)', 'teacher': 'Толеуова М. Ө.', 'room': '1к232', 'type': 2},
+      {'пара': '2', 'sub': 'Физкультура (Сем)', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
+      {'пара': '3', 'sub': 'Комп. графика (Лек)', 'teacher': 'Коккоз М. М.', 'room': 'Гк430', 'type': 1},
+      {'пара': '3', 'sub': 'Теор. вероятностей (Лаб)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к305', 'type': 2},
+      {'пара': '4', 'sub': 'Теор. вероятностей (Лаб)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к304', 'type': 1},
+      {'пара': '4', 'sub': 'Теор. вероятностей (Лек)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к304', 'type': 2}
+    ],
+    'Вторник': [
+      {'пара': '1', 'sub': 'Политология (Лек)', 'teacher': 'Казбеков Н. А.', 'room': '1к209', 'type': 1},
+      {'пара': '1', 'sub': 'Психология (Лек)', 'teacher': 'Курымбаева С. К.', 'room': 'Гк420', 'type': 2},
+      {'пара': '2', 'sub': 'Комп. графика (Лаб)', 'teacher': 'Тапенова Г. С.', 'room': 'Гк400', 'type': 0}
+    ],
+    'Среда': [
+      {'пара': '1', 'sub': 'ООП Python (Лек)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк434', 'type': 0},
+      {'пара': '2', 'sub': 'Базы данных (Лаб)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 1},
+      {'пара': '2', 'sub': 'Базы данных (Лек)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк422', 'type': 2},
+      {'пара': '3', 'sub': 'ООП Python (Лаб)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк422', 'type': 0}
+    ],
+    'Четверг': [
+      {'пара': '1', 'sub': 'Физкультура (Сем)', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
+      {'пара': '2', 'sub': 'Базы данных (Лаб)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 0},
+      {'пара': '3', 'sub': 'ООП Python (Лаб)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк430', 'type': 2}
+    ]
+  };
 
-    const container = document.getElementById('schedule');
-    container.innerHTML = '<div style="text-align: center; margin-top: 20px;">Загрузка расписания...</div>';
+  const EXAMS = [
+    { date: '12 мая (ВТ)', time: '09:00', sub: 'Комп. графика', teacher: 'Коккоз М. М.', room: 'Главный корпус, 422б' },
+    { date: '15 мая (ПТ)', time: '09:00', sub: 'Психология', teacher: 'Курымбаева С. К.', room: 'Корпус №1, 232' },
+    { date: '15 мая (ПТ)', time: '09:00', sub: 'Политология', teacher: 'Казбеков Н. А.', room: 'Корпус №1, 232' },
+    { date: '18 мая (ПН)', time: '09:00', sub: 'Базы данных', teacher: 'Кәмен Е. Ғ.', room: 'Главный корпус, 421' },
+    { date: '21 мая (ЧТ)', time: '09:00', sub: 'Теор. вероятностей', teacher: 'Бекмагамбетова Э. К.', room: 'Корпус №1, 312' }
+  ];
 
-    try {
-      const url = `https://nickname-crib-feel.ngrok-free.dev/api/schedule/${encodeURIComponent(dayName)}?ngrok-skip-browser-warning=69420`;
-      const response = await fetch(url);
+  // ================= 2. ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ =================
+  function getWeekType(date = new Date()) {
+    const target = new Date(date.valueOf());
+    const dayNr = (date.getDay() + 6) % 7;
+    target.setDate(target.getDate() - dayNr + 3);
+    const firstThursday = target.valueOf();
+    target.setMonth(0, 1);
+    if (target.getDay() !== 4) {
+      target.setMonth(0, 1 + ((4 - target.getDay() + 7) % 7));
+    }
+    const weekNumber = 1 + Math.round((firstThursday - target) / 604800000);
+    return (weekNumber % 2 !== 0) ? 1 : 2; // 1 - Числитель, 2 - Знаменатель
+  }
 
-      if (!response.ok) {
-        throw new Error(`Ошибка HTTP: ${response.status}`);
-      }
+  function getTime(paraNum) {
+    const times = {
+      '1': '09:00 - 10:45',
+      '2': '10:55 - 12:40',
+      '3': '13:10 - 14:55',
+      '4': '15:05 - 16:50',
+      '5': '17:00 - 18:45'
+    };
+    return times[paraNum] || 'Время неизвестно';
+  }
 
-      const items = await response.json();
+  let currentMode = 'current'; // current, next, exams
+  let selectedDay = 'Понедельник';
 
-      if (!Array.isArray(items) || items.length === 0) {
-        container.innerHTML = '<div style="color: #888; text-align: center; margin-top: 20px;">Пар нет! 🎉</div>';
-        return;
-      }
+  // ================= 3. ЛОГИКА ОТОБРАЖЕНИЯ =================
+  function updateStatusBar() {
+    const currentWeekType = getWeekType();
+    const currentWeekName = currentWeekType === 1 ? "Числитель ⚡" : "Знаменатель 🌙";
+    const bar = document.getElementById('statusBar');
 
-      let htmlContent = '';
-      
-      for (let i = 0; i < items.length; i++) {
-        const item = items[i];
-        
-        let badgeStyle = "background: #e0e0e0; color: #333;";
-        let typeText = item.type || "Занятие";
-
-        if (typeText.includes("числ")) {
-          typeText = "⚡ Числитель";
-          badgeStyle = "background: #e3f2fd; color: #1565c0;";
-        } else if (typeText.includes("знам")) {
-          typeText = "🌙 Знаменатель";
-          badgeStyle = "background: #f3e5f5; color: #7b1fa2;";
-        } else if (typeText.includes("всег")) {
-          typeText = "🔄 Каждую неделю";
-          badgeStyle = "background: #e8f5e9; color: #2e7d32;";
-        }
-
-        htmlContent += `
-          <div class="card" style="border: 1px solid #e0e0e0; padding: 14px; margin-bottom: 12px; border-radius: 10px; background: #fff;">
-            <div class="time-box" style="display: flex; justify-content: space-between; align-items: center;">
-              <strong style="font-size: 1.1em; color: #111;">Пара №${item.num}</strong>
-              <span style="${badgeStyle} padding: 4px 8px; border-radius: 6px; font-size: 0.85em; font-weight: 600;">
-                ${typeText}
-              </span>
-            </div>
-            <div class="info" style="margin-top: 8px;">
-              <div class="title" style="font-weight: bold; font-size: 1.05em; color: #222;">
-                ${item.title}
-              </div>
-              <div class="meta" style="color: #666; font-size: 0.9em; margin-top: 6px;">
-                🚪 Аудитория: <strong>${item.room}</strong> • 👨‍🏫 ${item.teacher}
-              </div>
-            </div>
-          </div>
-        `;
-      }
-
-      container.innerHTML = htmlContent;
-
-    } catch (error) {
-      console.error('Ошибка в скрипте:', error);
-      container.innerHTML = `<div style="color: red; text-align: center; margin-top: 20px;">Ошибка загрузки расписания (${error.message})</div>`;
+    if (currentMode === 'current') {
+      bar.innerHTML = `Текущая неделя: <b>${currentWeekName}</b>`;
+    } else if (currentMode === 'next') {
+      const nextWeekName = currentWeekType === 1 ? "Знаменатель 🌙" : "Числитель ⚡";
+      bar.innerHTML = `Просмотр следующей недели: <b>${nextWeekName}</b>`;
+    } else {
+      bar.innerHTML = `📌 <b>Расписание сессии / экзаменов</b>`;
     }
   }
 
+  function switchWeek(mode) {
+    currentMode = mode;
+    
+    // Обновляем активные вкладки
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    if (mode === 'current') document.getElementById('tabCurrent').classList.add('active');
+    if (mode === 'next') document.getElementById('tabNext').classList.add('active');
+    if (mode === 'exams') document.getElementById('tabExams').classList.add('active');
+
+    const daysGrid = document.getElementById('daysGrid');
+    
+    if (mode === 'exams') {
+      daysGrid.style.display = 'none';
+      renderExams();
+    } else {
+      daysGrid.style.display = 'grid';
+      renderSchedule();
+    }
+    
+    updateStatusBar();
+  }
+
+  function selectDay(dayName, btn) {
+    selectedDay = dayName;
+    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    renderSchedule();
+  }
+
+  function renderSchedule() {
+    const container = document.getElementById('scheduleContainer');
+    const currentWeekType = getWeekType();
+    
+    // Вычисляем целевую неделю (1 или 2)
+    let targetWeek = currentWeekType;
+    if (currentMode === 'next') {
+      targetWeek = currentWeekType === 1 ? 2 : 1;
+    }
+
+    const dayLessons = SCHEDULE[selectedDay] || [];
+    const filteredLessons = dayLessons.filter(l => l.type === 0 || l.type === targetWeek);
+
+    if (filteredLessons.length === 0) {
+      container.innerHTML = '<div class="empty-state">🎉 В этот день пар нет! Отдыхай.</div>';
+      return;
+    }
+
+    let html = '';
+    filteredLessons.forEach(item => {
+      let typeBadge = '';
+      if (item.type === 1) typeBadge = '<span class="badge-type type-1">Числитель</span>';
+      else if (item.type === 2) typeBadge = '<span class="badge-type type-2">Знаменатель</span>';
+      else typeBadge = '<span class="badge-type type-0">Каждую неделю</span>';
+
+      html += `
+        <div class="card">
+          <div class="card-header">
+            <span class="para-num">Пара №${item.пара}</span>
+            <span class="time-badge">🕐 ${getTime(item.пара)}</span>
+          </div>
+          <div class="subject">${item.sub}</div>
+          <div class="meta-info">
+            <div>👨‍🏫 ${item.teacher}</div>
+            <div>🚪 Аудитория: <strong>${item.room}</strong></div>
+            <div>${typeBadge}</div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  function renderExams() {
+    const container = document.getElementById('scheduleContainer');
+    let html = '';
+
+    EXAMS.forEach(exam => {
+      html += `
+        <div class="card" style="border-left: 4px solid #2563eb;">
+          <div class="card-header">
+            <span class="para-num">📅 ${exam.date}</span>
+            <span class="time-badge">🕐 ${exam.time}</span>
+          </div>
+          <div class="subject">💻 ${exam.sub}</div>
+          <div class="meta-info">
+            <div>👨‍🏫 Препод: ${exam.teacher}</div>
+            <div>📍 Локация: <strong>${exam.room}</strong></div>
+          </div>
+        </div>
+      `;
+    });
+
+    container.innerHTML = html;
+  }
+
+  // Инициализация при старте
   document.addEventListener('DOMContentLoaded', () => {
-    const firstBtn = document.querySelector('.day-btn');
-    selectDay('Понедельник', firstBtn);
+    updateStatusBar();
+    renderSchedule();
   });
 </script>
+
+</body>
+</html>
