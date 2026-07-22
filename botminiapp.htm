@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Расписание занятий</title>
+  <!-- Подключаем Telegram Web App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg-color: var(--tg-theme-bg-color, #ffffff);
+      --text-color: var(--tg-theme-text-color, #000000);
+      --hint-color: var(--tg-theme-hint-color, #8e8e93);
+      --button-color: var(--tg-theme-button-color, #2481cc);
+      --button-text-color: var(--tg-theme-button-text-color, #ffffff);
+      --secondary-bg: var(--tg-theme-secondary-bg-color, #f4f4f5);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      margin: 0;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+
+    h2 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    /* Дни недели */
+    .days-tabs {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 8px;
+      margin-bottom: 16px;
+    }
+
+    .day-btn {
+      background: var(--secondary-bg);
+      color: var(--text-color);
+      border: none;
+      padding: 8px 14px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .day-btn.active {
+      background: var(--button-color);
+      color: var(--button-text-color);
+    }
+
+    /* Карточка пары */
+    .schedule-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card {
+      background: var(--secondary-bg);
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .time-box {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      min-width: 70px;
+    }
+
+    .time {
+      font-weight: bold;
+      font-size: 15px;
+    }
+
+    .num {
+      font-size: 12px;
+      color: var(--hint-color);
+    }
+
+    .info {
+      flex-grow: 1;
+      margin-left: 12px;
+    }
+
+    .title {
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: var(--hint-color);
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 6px;
+      background: rgba(0,0,0,0.06);
+      font-weight: 600;
+      margin-left: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🎓 Расписание занятий</h2>
+
+  <!-- Навигация по дням -->
+  <div class="days-tabs">
+    <button class="day-btn active" onclick="selectDay('mon', this)">ПН</button>
+    <button class="day-btn" onclick="selectDay('tue', this)">ВТ</button>
+    <button class="day-btn" onclick="selectDay('wed', this)">СР</button>
+    <button class="day-btn" onclick="selectDay('thu', this)">ЧТ</button>
+    <button class="day-btn" onclick="selectDay('fri', this)">ПТ</button>
+  </div>
+
+  <!-- Список пар -->
+  <div class="schedule-list" id="schedule">
+    <!-- Сюда JS подставит пары -->
+  </div>
+
+  <script>
+    // Сообщаем Телеграму, что приложение готово
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand(); // Разворачиваем на весь экран
+
+    // Пример базы данных расписания
+    const scheduleData = {
+      mon: [
+        { time: "08:30 - 09:50", num: "1 пара", title: "Высшая математика", room: "302 ауд.", type: "Лекция", teacher: "Иванов И.И." },
+        { time: "10:05 - 11:25", num: "2 пара", title: "Программирование на Python", room: "410 ауд.", type: "Лаб", teacher: "Петров П.П." },
+        { time: "11:40 - 13:00", num: "3 пара", title: "Базы данных", room: "215 ауд.", type: "Практика", teacher: "Сидоров С.С." }
+      ],
+      tue: [
+        { time: "10:05 - 11:25", num: "2 пара", title: "Физика", room: "101 ауд.", type: "Лекция", teacher: "Смирнов А.А." },
+        { time: "11:40 - 13:00", num: "3 пара", title: "Английский язык", room: "504 ауд.", type: "Практика", teacher: "Джонсон М." }
+      ],
+      wed: [
+        { time: "08:30 - 09:50", num: "1 пара", title: "Алгоритмы и структуры данных", room: "305 ауд.", type: "Лекция", teacher: "Кузнецов В.В." }
+      ],
+      thu: [],
+      fri: [
+        { time: "11:40 - 13:00", num: "3 пара", title: "Физическая культура", room: "Спортзал", type: "Практика", teacher: "Соколов Б.В." }
+      ]
+    };
+
+    function renderSchedule(day) {
+      const container = document.getElementById('schedule');
+      const items = scheduleData[day] || [];
+
+      if (items.length === 0) {
+        container.innerHTML = '<div style="color: var(--hint-color); text-align: center; margin-top: 20px;">Пар нет, можно отдыхать! 🎉</div>';
+        return;
+      }
+
+      container.innerHTML = items.map(item => `
+        <div class="card">
+          <div class="time-box">
+            <span class="time">${item.time.split(' - ')[0]}</span>
+            <span class="num">${item.num}</span>
+          </div>
+          <div class="info">
+            <div class="title">${item.title} <span class="badge">${item.type}</span></div>
+            <div class="meta">🚪 ${item.room} • 👨‍🏫 ${item.teacher}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function selectDay(day, btn) {
+      document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderSchedule(day);
+    }
+
+    // Загружаем понедельник по умолчанию
+    renderSchedule('mon');
+  </script>
+</body>
+</html>
