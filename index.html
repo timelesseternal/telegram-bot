@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="color-scheme" content="dark">
+  <meta name="color-scheme" content="light dark">
   <title>Расписание</title>
 
   <!-- Telegram Web App SDK -->
@@ -11,9 +11,9 @@
 
   <style>
     :root {
-      color-scheme: dark;
+      color-scheme: light dark;
     }
-    
+
     * {
       box-sizing: border-box;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -21,8 +21,8 @@
     }
     
     html, body {
-      background-color: #121212 !important;
-      color: #ffffff !important;
+      background-color: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-text-color, #000000);
       margin: 0;
       padding: 0;
       width: 100%;
@@ -31,8 +31,8 @@
     }
 
     .app-wrapper {
-      padding-top: calc(var(--tg-content-safe-area-inset-top, env(safe-area-inset-top, 20px)) + 12px);
-      padding-bottom: calc(var(--tg-content-safe-area-inset-bottom, env(safe-area-inset-bottom, 20px)) + 16px);
+      padding-top: calc(env(safe-area-inset-top, 20px) + 12px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 20px) + 16px);
       padding-left: 12px;
       padding-right: 12px;
       box-sizing: border-box;
@@ -44,15 +44,15 @@
     }
 
     .status-bar {
-      background: var(--tg-theme-secondary-bg-color, #1e1e1e) !important;
-      color: var(--tg-theme-text-color, #ffffff) !important;
+      background: var(--tg-theme-secondary-bg-color, #f1f1f1);
+      color: var(--tg-theme-text-color, #000000);
       padding: 10px 12px;
       border-radius: 12px;
       font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 12px;
       text-align: center;
-      border: 1px solid rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(128, 128, 128, 0.2);
     }
 
     .nav-tabs {
@@ -65,9 +65,9 @@
     .tab-btn {
       flex: 1;
       padding: 10px 4px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: var(--tg-theme-secondary-bg-color, #1e1e1e) !important;
-      color: var(--tg-theme-hint-color, #a0a0a0) !important;
+      border: 1px solid rgba(128, 128, 128, 0.2);
+      background: var(--tg-theme-secondary-bg-color, #f1f1f1);
+      color: var(--tg-theme-hint-color, #707070);
       border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
@@ -77,9 +77,9 @@
     }
 
     .tab-btn.active {
-      background: var(--tg-theme-button-color, #e11d48) !important;
+      background: var(--tg-theme-button-color, #2481cc) !important;
       color: var(--tg-theme-button-text-color, #ffffff) !important;
-      border-color: var(--tg-theme-button-color, #e11d48) !important;
+      border-color: var(--tg-theme-button-color, #2481cc) !important;
     }
 
     .days-grid {
@@ -91,9 +91,9 @@
 
     .day-btn {
       padding: 10px 0;
-      border: 1px solid var(--tg-theme-button-color, #e11d48);
-      background: transparent !important;
-      color: var(--tg-theme-button-color, #e11d48) !important;
+      border: 1px solid var(--tg-theme-button-color, #2481cc);
+      background: var(--tg-theme-bg-color, #ffffff);
+      color: var(--tg-theme-button-color, #2481cc);
       border-radius: 10px;
       font-weight: bold;
       cursor: pointer;
@@ -102,24 +102,24 @@
     }
 
     .day-btn.active {
-      background: var(--tg-theme-button-color, #e11d48) !important;
-      color: var(--tg-theme-button-text-color, #ffffff) !important;
+      background: var(--tg-theme-button-color, #2481cc);
+      color: var(--tg-theme-button-text-color, #ffffff);
     }
 
     .card {
-      border: 1px solid rgba(255, 255, 255, 0.08) !important;
+      border: 1px solid rgba(128, 128, 128, 0.2);
       border-radius: 14px;
       padding: 14px;
       margin-bottom: 10px;
-      background: var(--tg-theme-secondary-bg-color, #1e1e1e) !important;
-      color: var(--tg-theme-text-color, #ffffff) !important;
+      background: var(--tg-theme-secondary-bg-color, #f9f9f9);
+      color: var(--tg-theme-text-color, #000000);
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid rgba(128, 128, 128, 0.15);
       padding-bottom: 8px;
       margin-bottom: 8px;
     }
@@ -127,20 +127,20 @@
     .para-num {
       font-weight: 700;
       font-size: 0.95rem;
-      color: var(--tg-theme-text-color, #ffffff) !important;
+      color: var(--tg-theme-text-color, #000000);
     }
 
     .time-badge {
       font-size: 0.8rem;
-      background: rgba(255, 255, 255, 0.08) !important;
+      background: rgba(128, 128, 128, 0.15);
       padding: 4px 8px;
       border-radius: 8px;
       font-weight: 600;
-      color: var(--tg-theme-hint-color, #cccccc) !important;
+      color: var(--tg-theme-hint-color, #555555);
     }
 
     .subject-title {
-      color: #ffffff !important;
+      color: var(--tg-theme-text-color, #000000);
       font-weight: 800;
       font-size: 1.1rem;
       margin-bottom: 8px;
@@ -149,11 +149,15 @@
     .meta-info {
       font-size: 0.875rem;
       line-height: 1.4;
-      color: var(--tg-theme-hint-color, #aaaaaa) !important;
+      color: var(--tg-theme-hint-color, #555555);
     }
 
     .meta-info div {
       margin-top: 4px;
+    }
+
+    .meta-info strong {
+      color: var(--tg-theme-text-color, #000000);
     }
 
     .badge-type {
@@ -165,14 +169,14 @@
       font-weight: 700;
     }
 
-    .type-1 { background: rgba(59, 130, 246, 0.2) !important; color: #60a5fa !important; border: 1px solid rgba(59, 130, 246, 0.4); }
-    .type-2 { background: rgba(168, 85, 247, 0.2) !important; color: #c084fc !important; border: 1px solid rgba(168, 85, 247, 0.4); }
-    .type-0 { background: rgba(34, 197, 94, 0.2) !important; color: #4ade80 !important; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .type-1 { background: rgba(59, 130, 246, 0.15); color: var(--tg-theme-link-color, #2481cc); border: 1px solid rgba(59, 130, 246, 0.3); }
+    .type-2 { background: rgba(168, 85, 247, 0.15); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.3); }
+    .type-0 { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
 
     .empty-state {
       text-align: center;
       padding: 40px 10px;
-      color: var(--tg-theme-hint-color, #888888) !important;
+      color: var(--tg-theme-hint-color, #777777);
       font-size: 0.95rem;
     }
   </style>
@@ -206,6 +210,7 @@
   if (tg) {
     tg.ready();
     tg.expand();
+    // Автоматически синхронизируем цвет шапки с текущей темой телефона
     if (tg.setHeaderColor) tg.setHeaderColor('bg_color');
     if (tg.setBackgroundColor) tg.setBackgroundColor('bg_color');
     tg.onEvent('viewportChanged', () => tg.expand());
@@ -371,7 +376,7 @@
           <div class="subject-title">${item.sub}</div>
           <div class="meta-info">
             <div>👩‍🏫 ${item.teacher}</div>
-            <div>🚪 Кабинет: <strong style="color: #ffffff !important;">${item.room}</strong></div>
+            <div>🚪 Кабинет: <strong>${item.room}</strong></div>
             <div>${typeBadge}</div>
           </div>
         </div>
@@ -386,7 +391,7 @@
     let html = '';
     EXAMS.forEach(exam => {
       html += `
-        <div class="card" style="border-left: 4px solid var(--tg-theme-button-color, #e11d48) !important;">
+        <div class="card" style="border-left: 4px solid var(--tg-theme-button-color, #2481cc);">
           <div class="card-header">
             <span class="para-num">📅 ${exam.date}</span>
             <span class="time-badge">🕐 ${exam.time}</span>
@@ -394,7 +399,7 @@
           <div class="subject-title">${exam.sub}</div>
           <div class="meta-info">
             <div>👨‍🏫 Препод: ${exam.teacher}</div>
-            <div>📍 Локация: <strong style="color: #ffffff !important;">${exam.room}</strong></div>
+            <div>📍 Локация: <strong>${exam.room}</strong></div>
           </div>
         </div>
       `;
