@@ -5,10 +5,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Расписание</title>
 
-  <!-- Telegram Web App SDK -->
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
   <style>
+    :root {
+      /* Светлая тема (modern clean, высокая читаемость) */
+      --bg-color: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-main: #1a1a1a;
+      --text-muted: #555555;
+      --accent: #0066cc;
+      --accent-text: #ffffff;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --badge-bg: #f1f3f5;
+    }
+
+    [data-theme="dark"] {
+      /* Темная тема (мягкий OLED/модерн, приглушенный синий акцент) */
+      --bg-color: #0f1012;
+      --card-bg: #18191c;
+      --text-main: #f1f3f5;
+      --text-muted: #9ba1a6;
+      --accent: #3388ff;
+      --accent-text: #ffffff;
+      --border-color: rgba(255, 255, 255, 0.08);
+      --badge-bg: #222428;
+    }
+
     * {
       box-sizing: border-box;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -16,61 +39,14 @@
     }
     
     html, body {
+      background-color: var(--bg-color);
+      color: var(--text-main);
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
       overflow-x: hidden;
-      transition: background 0.2s, color 0.2s;
-    }
-
-    /* Светлая тема по умолчанию */
-    body.light {
-      background-color: #ffffff;
-      color: #000000;
-    }
-    body.light .status-bar, body.light .tab-btn {
-      background: #f1f1f1;
-      color: #000000;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    body.light .card {
-      background: #f9f9f9;
-      color: #000000;
-      border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    body.light .card-header {
-      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    }
-    body.light .time-badge {
-      background: rgba(0, 0, 0, 0.06);
-      color: #333333;
-    }
-
-    /* Тёмная тема */
-    body.dark {
-      background-color: #121212;
-      color: #ffffff;
-    }
-    body.dark .status-bar, body.dark .tab-btn {
-      background: #1e1e1e;
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    body.dark .card {
-      background: #1e1e1e;
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    body.dark .card-header {
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    body.dark .time-badge {
-      background: rgba(255, 255, 255, 0.08);
-      color: #cccccc;
-    }
-    body.dark .meta-info strong {
-      color: #ffffff;
+      transition: background-color 0.2s ease, color 0.2s ease;
     }
 
     .app-wrapper {
@@ -87,12 +63,16 @@
     }
 
     .status-bar {
-      padding: 10px 12px;
-      border-radius: 12px;
+      background: var(--card-bg);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 14px;
       font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 12px;
       text-align: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      border: 1px solid var(--border-color);
     }
 
     .nav-tabs {
@@ -105,18 +85,22 @@
     .tab-btn {
       flex: 1;
       padding: 10px 4px;
-      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      border-radius: 12px;
       font-weight: 600;
       cursor: pointer;
       font-size: 0.8rem;
       white-space: nowrap;
       text-align: center;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
 
     .tab-btn.active {
-      background: #2481cc !important;
-      color: #ffffff !important;
-      border-color: #2481cc !important;
+      background: var(--accent) !important;
+      color: var(--accent-text) !important;
+      border-color: var(--accent) !important;
     }
 
     .days-grid {
@@ -128,31 +112,38 @@
 
     .day-btn {
       padding: 10px 0;
-      border: 1px solid #2481cc;
-      background: transparent;
-      color: #2481cc;
-      border-radius: 10px;
-      font-weight: bold;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-main);
+      border-radius: 12px;
+      font-weight: 600;
       cursor: pointer;
       text-align: center;
       font-size: 0.85rem;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
     }
 
     .day-btn.active {
-      background: #2481cc !important;
-      color: #ffffff !important;
+      background: var(--accent) !important;
+      color: var(--accent-text) !important;
+      border-color: var(--accent) !important;
     }
 
     .card {
-      border-radius: 14px;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
       padding: 14px;
       margin-bottom: 10px;
+      background: var(--card-bg);
+      color: var(--text-main);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
     }
 
     .card-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      border-bottom: 1px solid var(--border-color);
       padding-bottom: 8px;
       margin-bottom: 8px;
     }
@@ -160,47 +151,70 @@
     .para-num {
       font-weight: 700;
       font-size: 0.95rem;
+      color: var(--text-main);
     }
 
     .time-badge {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
+      background: var(--badge-bg);
       padding: 4px 8px;
       border-radius: 8px;
-      font-weight: 600;
+      font-weight: 500;
+      color: var(--text-muted);
     }
 
     .subject-title {
-      font-weight: 800;
-      font-size: 1.1rem;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 1.05rem;
       margin-bottom: 8px;
     }
 
     .meta-info {
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       line-height: 1.4;
+      color: var(--text-muted);
     }
 
     .meta-info div {
       margin-top: 4px;
     }
 
+    .meta-info strong {
+      color: var(--text-main);
+      font-weight: 600;
+    }
+
     .badge-type {
       display: inline-block;
       margin-top: 8px;
-      padding: 4px 10px;
+      padding: 3px 8px;
       border-radius: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.2px;
     }
 
-    .type-1 { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.4); }
-    .type-2 { background: rgba(168, 85, 247, 0.2); color: #a855f7; border: 1px solid rgba(168, 85, 247, 0.4); }
-    .type-0 { background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.4); }
+    .type-1 { 
+      background: transparent; 
+      color: var(--accent); 
+      border: 1px solid var(--accent); 
+    }
+    .type-2 { 
+      background: transparent; 
+      color: #9333ea; 
+      border: 1px solid #9333ea; 
+    }
+    .type-0 { 
+      background: transparent; 
+      color: #16a34a; 
+      border: 1px solid #16a34a; 
+    }
 
     .empty-state {
       text-align: center;
       padding: 40px 10px;
-      opacity: 0.6;
+      color: var(--text-muted);
       font-size: 0.95rem;
     }
   </style>
@@ -231,24 +245,21 @@
 <script>
   const tg = window.Telegram ? window.Telegram.WebApp : null;
 
-  function applyTheme() {
-    const theme = tg && tg.colorScheme ? tg.colorScheme : 'light';
-    document.body.className = theme; // Присваивает класс 'dark' или 'light'
-    
-    if (tg) {
-      if (tg.setHeaderColor) tg.setHeaderColor(theme === 'dark' ? '#121212' : '#ffffff');
-      if (tg.setBackgroundColor) tg.setBackgroundColor(theme === 'dark' ? '#121212' : '#ffffff');
-    }
-  }
-
   if (tg) {
     tg.ready();
     tg.expand();
-    applyTheme();
-    tg.onEvent('themeChanged', applyTheme);
+    
+    const isDark = tg.colorScheme === 'dark';
+    if (isDark) {
+      document.documentElement.setAttribute('data-theme', 'dark');
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+
+    if (tg.setHeaderColor) tg.setHeaderColor('bg_color');
+    if (tg.setBackgroundColor) tg.setBackgroundColor('bg_color');
+    
     tg.onEvent('viewportChanged', () => tg.expand());
-  } else {
-    document.body.className = 'dark'; // Дефолт если открыто вне телеги
   }
 
   const SCHEDULE = {
@@ -426,7 +437,7 @@
     let html = '';
     EXAMS.forEach(exam => {
       html += `
-        <div class="card" style="border-left: 4px solid #2481cc;">
+        <div class="card" style="border-left: 3px solid var(--accent);">
           <div class="card-header">
             <span class="para-num">📅 ${exam.date}</span>
             <span class="time-badge">🕐 ${exam.time}</span>
