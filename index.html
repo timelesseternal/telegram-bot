@@ -202,12 +202,10 @@
     tg.ready();
     tg.expand();
 
-    // Включаем встроенное управление свайпами и полноэкранный режим если поддерживается
     if (tg.isExpanded) {
       document.body.classList.add('is-expanded');
     }
     
-    // Подкрашиваем системный статусбар приложения
     if (tg.setHeaderColor) {
       tg.setHeaderColor('secondary_bg_color');
     }
@@ -215,7 +213,6 @@
       tg.setBackgroundColor('bg_color');
     }
 
-    // Слушаем изменение размера экрана Телеграма
     tg.onEvent('viewportChanged', () => {
       tg.expand();
     });
@@ -283,8 +280,17 @@
 
   let currentMode = 'current';
 
-  // Определяем сегодняшний день при загрузке
-  const daysMap = ['Понедельник', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Понедельник', 'Понедельник'];
+  // В JS getDay() возвращает: 0 - Воскресенье, 1 - Понедельник, 2 - Вторник, 3 - Среда, 4 - Четверг, 5 - Пятница, 6 - Суббота
+  const daysMap = [
+    'Понедельник', // 0 (Вс) -> Понедельник
+    'Понедельник', // 1 (Пн)
+    'Вторник',     // 2 (Вт)
+    'Среда',       // 3 (Ср)
+    'Четверг',     // 4 (Чт)
+    'Понедельник', // 5 (Пт) -> Понедельник
+    'Понедельник'  // 6 (Сб) -> Понедельник
+  ];
+  
   const todayIndex = new Date().getDay();
   let selectedDay = daysMap[todayIndex];
 
@@ -333,8 +339,15 @@
 
   function selectDay(dayName, btn) {
     selectedDay = dayName;
-    document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-    if (btn) btn.classList.add('active');
+    
+    document.querySelectorAll('.day-btn').forEach(b => {
+      if (b.textContent.trim() === getShortDayName(dayName)) {
+        b.classList.add('active');
+      } else {
+        b.classList.remove('active');
+      }
+    });
+
     renderSchedule();
   }
 
@@ -401,9 +414,10 @@
   document.addEventListener('DOMContentLoaded', () => {
     updateStatusBar();
 
-    const dayButtons = document.querySelectorAll('.day-btn');
-    dayButtons.forEach(btn => {
-      if (btn.textContent.trim() === getShortDayName(selectedDay)) {
+    // Автоматическая подсветка кнопки текущего дня
+    const shortName = getShortDayName(selectedDay);
+    document.querySelectorAll('.day-btn').forEach(btn => {
+      if (btn.textContent.trim() === shortName) {
         btn.classList.add('active');
       } else {
         btn.classList.remove('active');
