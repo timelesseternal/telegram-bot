@@ -21,7 +21,11 @@
 
     try {
       // Подставь сюда адрес твоего запущенного API (или ngrok-ссылку)
-      const response = await fetch(`https://nickname-crib-feel.ngrok-free.dev/api/schedule/${encodeURIComponent(dayName)}`);
+      const response = await fetch(`https://nickname-crib-feel.ngrok-free.dev/api/schedule/${encodeURIComponent(dayName)}`, {
+  headers: {
+    'ngrok-skip-browser-warning': 'true'
+  }
+});
       const items = await response.json();
 
       if (!items || items.length === 0) {
