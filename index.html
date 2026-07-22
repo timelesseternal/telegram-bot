@@ -14,18 +14,19 @@
   async function selectDay(dayName, btn) {
     // Подсветка активной кнопки
     document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+    if (btn) btn.classList.add('active');
 
     const container = document.getElementById('schedule');
     container.innerHTML = '<div style="text-align: center; margin-top: 20px;">Загрузка...</div>';
 
     try {
-      // Подставь сюда адрес твоего запущенного API (или ngrok-ссылку)
-      const response = await fetch(`https://nickname-crib-feel.ngrok-free.dev/api/schedule/${encodeURIComponent(dayName)}`, {
-  headers: {
-    'ngrok-skip-browser-warning': 'true'
-  }
-});
+      // Адрес твоей запущенной ссылки ngrok с флагом обхода заставки
+      const response = await fetch(`https://nickname-crib-feel.ngrok-free.dev/api/schedule/${encodeURIComponent(dayName)}?ngrok-skip-browser-warning=true`);
+      
+      if (!response.ok) {
+        throw new Error(`Ошибка сервера: ${response.status}`);
+      }
+
       const items = await response.json();
 
       if (!items || items.length === 0) {
@@ -46,11 +47,13 @@
       `).join('');
 
     } catch (error) {
-      console.error(error);
+      console.error('Ошибка:', error);
       container.innerHTML = '<div style="color: red; text-align: center; margin-top: 20px;">Ошибка загрузки расписания</div>';
     }
   }
 
   // При старте автоматически загружаем Понедельник
-  selectDay('Понедельник', document.querySelector('.day-btn.active'));
+  document.addEventListener('DOMContentLoaded', () => {
+    selectDay('Понедельник', document.querySelector('.day-btn.active'));
+  });
 </script>
