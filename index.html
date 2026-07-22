@@ -14,19 +14,27 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
+    
+    html {
+      background-color: var(--tg-theme-bg-color, #0f0f0f);
+    }
+
     body {
       background-color: var(--tg-theme-bg-color, #0f0f0f);
       color: var(--tg-theme-text-color, #ffffff);
       margin: 0;
-      padding-top: calc(env(safe-area-inset-top, 20px) + 10px);
-      padding-bottom: env(safe-area-inset-bottom, 20px);
+      /* Гарантированный отступ от челки/динамического острова: минимум 54px или размер safe-area */
+      padding-top: max(54px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
       padding-left: 12px;
       padding-right: 12px;
     }
+
     .container {
       max-width: 500px;
       margin: 0 auto;
     }
+
     .status-bar {
       background: var(--tg-theme-secondary-bg-color, #1c1c1e);
       color: var(--tg-theme-link-color, #64b5f6);
@@ -38,12 +46,14 @@
       text-align: center;
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
+
     .nav-tabs {
       display: flex;
       gap: 6px;
       margin-bottom: 12px;
       width: 100%;
     }
+
     .tab-btn {
       flex: 1;
       padding: 10px 4px;
@@ -57,17 +67,20 @@
       white-space: nowrap;
       text-align: center;
     }
+
     .tab-btn.active {
       background: var(--tg-theme-button-color, #2563eb);
       color: var(--tg-theme-button-text-color, #ffffff);
       border-color: var(--tg-theme-button-color, #2563eb);
     }
+
     .days-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
       margin-bottom: 14px;
     }
+
     .day-btn {
       padding: 10px 0;
       border: 1px solid var(--tg-theme-button-color, #2563eb);
@@ -79,10 +92,12 @@
       text-align: center;
       font-size: 0.85rem;
     }
+
     .day-btn.active {
       background: var(--tg-theme-button-color, #2563eb);
       color: var(--tg-theme-button-text-color, #ffffff);
     }
+
     .card {
       border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: 14px;
@@ -90,6 +105,7 @@
       margin-bottom: 10px;
       background: var(--tg-theme-secondary-bg-color, #1c1c1e);
     }
+
     .card-header {
       display: flex;
       justify-content: space-between;
@@ -98,10 +114,12 @@
       padding-bottom: 8px;
       margin-bottom: 8px;
     }
+
     .para-num {
       font-weight: 700;
       font-size: 0.95rem;
     }
+
     .time-badge {
       font-size: 0.8rem;
       background: rgba(255, 255, 255, 0.08);
@@ -110,20 +128,24 @@
       font-weight: 600;
       color: var(--tg-theme-text-color, #ffffff);
     }
+
     .subject {
       font-weight: 700;
       font-size: 1rem;
       margin-bottom: 8px;
       color: #ffffff;
     }
+
     .meta-info {
       font-size: 0.85rem;
       opacity: 0.85;
       line-height: 1.4;
     }
+
     .meta-info div {
       margin-top: 4px;
     }
+
     .badge-type {
       display: inline-block;
       margin-top: 8px;
@@ -132,9 +154,11 @@
       font-size: 0.75rem;
       font-weight: 600;
     }
+
     .type-1 { background: rgba(30, 64, 175, 0.4); color: #93c5fd; border: 1px solid #1e40af; }
     .type-2 { background: rgba(107, 33, 168, 0.4); color: #e9d5ff; border: 1px solid #6b21a8; }
     .type-0 { background: rgba(22, 101, 52, 0.4); color: #86efac; border: 1px solid #166534; }
+
     .empty-state {
       text-align: center;
       padding: 40px 10px;
@@ -170,6 +194,14 @@
   if (tg) {
     tg.ready();
     tg.expand();
+    
+    // Красим верхнюю панель Телеграма в цвет фона приложения
+    if (tg.setHeaderColor) {
+      tg.setHeaderColor('secondary_bg_color');
+    }
+    if (tg.setBackgroundColor) {
+      tg.setBackgroundColor('bg_color');
+    }
   }
 
   // Данные расписания
@@ -236,7 +268,7 @@
 
   // Определяем сегодняшний день при загрузке
   const daysMap = ['Понедельник', 'Понедельник', 'Вторник', 'Среда', 'Четверг', 'Понедельник', 'Понедельник'];
-  const todayIndex = new Date().getDay(); // 0 - Вс, 1 - Пн...
+  const todayIndex = new Date().getDay();
   let selectedDay = daysMap[todayIndex];
 
   function getShortDayName(fullDay) {
@@ -352,7 +384,6 @@
   document.addEventListener('DOMContentLoaded', () => {
     updateStatusBar();
 
-    // Автоматическая подсветка кнопки текущего дня
     const dayButtons = document.querySelectorAll('.day-btn');
     dayButtons.forEach(btn => {
       if (btn.textContent.trim() === getShortDayName(selectedDay)) {
