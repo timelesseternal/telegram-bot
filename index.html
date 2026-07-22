@@ -12,6 +12,7 @@
 
 <script>
   async function selectDay(dayName, btn) {
+    // Подсветка активной кнопки
     document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
@@ -23,37 +24,40 @@
       const response = await fetch(url);
 
       if (!response.ok) {
-        throw new Error(`Ошибка сервера: ${response.status}`);
+        throw new Error(`Ошибка HTTP: ${response.status}`);
       }
 
       const items = await response.json();
 
-      if (!items || items.length === 0) {
-        container.innerHTML = '<div style="color: var(--hint-color); text-align: center; margin-top: 20px;">Пар нет! 🎉</div>';
+      if (!Array.isArray(items) || items.length === 0) {
+        container.innerHTML = '<div style="color: #888; text-align: center; margin-top: 20px;">Пар нет! 🎉</div>';
         return;
       }
 
-      container.innerHTML = items.map(item => {
-        // Красивое форматирование типа недели
+      let htmlContent = '';
+      
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        
         let badgeStyle = "background: #e0e0e0; color: #333;";
-        let typeText = item.type;
+        let typeText = item.type || "Занятие";
 
-        if (item.type.includes("числ")) {
+        if (typeText.includes("числ")) {
           typeText = "⚡ Числитель";
           badgeStyle = "background: #e3f2fd; color: #1565c0;";
-        } else if (item.type.includes("знам")) {
+        } else if (typeText.includes("знам")) {
           typeText = "🌙 Знаменатель";
           badgeStyle = "background: #f3e5f5; color: #7b1fa2;";
-        } else if (item.type.includes("всег")) {
+        } else if (typeText.includes("всег")) {
           typeText = "🔄 Каждую неделю";
           badgeStyle = "background: #e8f5e9; color: #2e7d32;";
         }
 
-        return `
+        htmlContent += `
           <div class="card" style="border: 1px solid #e0e0e0; padding: 14px; margin-bottom: 12px; border-radius: 10px; background: #fff;">
             <div class="time-box" style="display: flex; justify-content: space-between; align-items: center;">
-              <strong style="font-size: 1.1em;">Пара №${item.num}</strong>
-              <span class="badge" style="${badgeStyle} padding: 4px 8px; border-radius: 6px; font-size: 0.85em; font-weight: 600;">
+              <strong style="font-size: 1.1em; color: #111;">Пара №${item.num}</strong>
+              <span style="${badgeStyle} padding: 4px 8px; border-radius: 6px; font-size: 0.85em; font-weight: 600;">
                 ${typeText}
               </span>
             </div>
@@ -67,11 +71,13 @@
             </div>
           </div>
         `;
-      }).join('');
+      }
+
+      container.innerHTML = htmlContent;
 
     } catch (error) {
-      console.error('Ошибка:', error);
-      container.innerHTML = '<div style="color: red; text-align: center; margin-top: 20px;">Ошибка загрузки расписания</div>';
+      console.error('Ошибка в скрипте:', error);
+      container.innerHTML = `<div style="color: red; text-align: center; margin-top: 20px;">Ошибка загрузки расписания (${error.message})</div>`;
     }
   }
 
