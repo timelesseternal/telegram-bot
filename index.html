@@ -15,19 +15,23 @@
       -webkit-tap-highlight-color: transparent;
     }
     
-    html {
-      background-color: var(--tg-theme-bg-color, #0f0f0f);
-    }
-
-    body {
+    html, body {
       background-color: var(--tg-theme-bg-color, #0f0f0f);
       color: var(--tg-theme-text-color, #ffffff);
       margin: 0;
-      /* Гарантированный отступ от челки/динамического острова: минимум 54px или размер safe-area */
-      padding-top: max(54px, env(safe-area-inset-top));
-      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    /* Главный контейнер с адаптивными безопасными отступами */
+    .app-wrapper {
+      padding-top: calc(var(--tg-content-safe-area-inset-top, env(safe-area-inset-top, 20px)) + 16px);
+      padding-bottom: calc(var(--tg-content-safe-area-inset-bottom, env(safe-area-inset-bottom, 20px)) + 16px);
       padding-left: 12px;
       padding-right: 12px;
+      box-sizing: border-box;
     }
 
     .container {
@@ -169,39 +173,52 @@
 </head>
 <body>
 
-<div class="container">
-  <div class="status-bar" id="statusBar">Загрузка...</div>
+<div class="app-wrapper">
+  <div class="container">
+    <div class="status-bar" id="statusBar">Загрузка...</div>
 
-  <div class="nav-tabs">
-    <button class="tab-btn active" id="tabCurrent" onclick="switchWeek('current')">Текущая</button>
-    <button class="tab-btn" id="tabNext" onclick="switchWeek('next')">Следующая</button>
-    <button class="tab-btn" id="tabExams" onclick="switchWeek('exams')">Экзамены</button>
+    <div class="nav-tabs">
+      <button class="tab-btn active" id="tabCurrent" onclick="switchWeek('current')">Текущая</button>
+      <button class="tab-btn" id="tabNext" onclick="switchWeek('next')">Следующая</button>
+      <button class="tab-btn" id="tabExams" onclick="switchWeek('exams')">Экзамены</button>
+    </div>
+
+    <div class="days-grid" id="daysGrid">
+      <button class="day-btn" onclick="selectDay('Понедельник', this)">ПН</button>
+      <button class="day-btn" onclick="selectDay('Вторник', this)">ВТ</button>
+      <button class="day-btn" onclick="selectDay('Среда', this)">СР</button>
+      <button class="day-btn" onclick="selectDay('Четверг', this)">ЧТ</button>
+    </div>
+
+    <div id="scheduleContainer"></div>
   </div>
-
-  <div class="days-grid" id="daysGrid">
-    <button class="day-btn" onclick="selectDay('Понедельник', this)">ПН</button>
-    <button class="day-btn" onclick="selectDay('Вторник', this)">ВТ</button>
-    <button class="day-btn" onclick="selectDay('Среда', this)">СР</button>
-    <button class="day-btn" onclick="selectDay('Четверг', this)">ЧТ</button>
-  </div>
-
-  <div id="scheduleContainer"></div>
 </div>
 
 <script>
   // Инициализация Telegram Mini App
   const tg = window.Telegram ? window.Telegram.WebApp : null;
+
   if (tg) {
     tg.ready();
     tg.expand();
+
+    // Включаем встроенное управление свайпами и полноэкранный режим если поддерживается
+    if (tg.isExpanded) {
+      document.body.classList.add('is-expanded');
+    }
     
-    // Красим верхнюю панель Телеграма в цвет фона приложения
+    // Подкрашиваем системный статусбар приложения
     if (tg.setHeaderColor) {
       tg.setHeaderColor('secondary_bg_color');
     }
     if (tg.setBackgroundColor) {
       tg.setBackgroundColor('bg_color');
     }
+
+    // Слушаем изменение размера экрана Телеграма
+    tg.onEvent('viewportChanged', () => {
+      tg.expand();
+    });
   }
 
   // Данные расписания
