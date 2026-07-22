@@ -12,7 +12,7 @@
 
 <script>
   async function selectDay(dayName, btn) {
-    // Переключение активной кнопки
+    // Переключение кнопок
     document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
 
@@ -20,14 +20,9 @@
     container.innerHTML = '<div style="text-align: center; margin-top: 20px;">Загрузка расписания...</div>';
 
     try {
-      const response = await fetch(
-        `https://nickname-crib-feel.ngrok-free.dev/api/schedule/${encodeURIComponent(dayName)}?ngrok-skip-browser-warning=69420`,
-        {
-          headers: {
-            'ngrok-skip-browser-warning': 'true'
-          }
-        }
-      );
+      // Чистый fetch без тяжелых заголовков
+      const url = `https://nickname-crib-feel.ngrok-free.dev/api/schedule/${encodeURIComponent(dayName)}?ngrok-skip-browser-warning=69420`;
+      const response = await fetch(url);
 
       if (!response.ok) {
         throw new Error(`Ошибка сервера: ${response.status}`);
@@ -40,18 +35,17 @@
         return;
       }
 
-      // Отрисовка карточек с зачисткой пробелов (.trim())
       container.innerHTML = items.map(item => `
         <div class="card" style="border: 1px solid #ccc; padding: 12px; margin-bottom: 10px; border-radius: 8px;">
           <div class="time-box">
-            <strong style="font-size: 1.2em;">Пара №${String(item.num).trim()}</strong>
+            <strong style="font-size: 1.1em;">Пара №${item.num}</strong>
           </div>
           <div class="info" style="margin-top: 6px;">
             <div class="title" style="font-weight: bold;">
-              ${item.title} <span class="badge" style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px; font-size: 0.8em;">Тип: ${String(item.type).trim()}</span>
+              ${item.title} <span class="badge" style="background: #e0e0e0; padding: 2px 6px; border-radius: 4px; font-size: 0.8em;">Тип: ${item.type}</span>
             </div>
             <div class="meta" style="color: #666; font-size: 0.9em; margin-top: 4px;">
-              🚪 Аудитория: ${item.room} • 👨‍🏫 ${item.teacher}
+              🚪 ${item.room} • 👨‍🏫 ${item.teacher}
             </div>
           </div>
         </div>
@@ -63,8 +57,9 @@
     }
   }
 
-  // Автозагрузка при старте страницы
   document.addEventListener('DOMContentLoaded', () => {
-    selectDay('Понедельник', document.querySelector('.day-btn'));
+    // Выбираем первую кнопку по умолчанию
+    const firstBtn = document.querySelector('.day-btn');
+    selectDay('Понедельник', firstBtn);
   });
 </script>
