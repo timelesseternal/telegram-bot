@@ -9,7 +9,6 @@
 
   <style>
     :root {
-      /* Светлая тема (modern clean, высокая читаемость) */
       --bg-color: #f8f9fa;
       --card-bg: #ffffff;
       --text-main: #1a1a1a;
@@ -18,10 +17,10 @@
       --accent-text: #ffffff;
       --border-color: rgba(0, 0, 0, 0.08);
       --badge-bg: #f1f3f5;
+      --overlay-bg: rgba(0, 0, 0, 0.5);
     }
 
     [data-theme="dark"] {
-      /* Темная тема (мягкий OLED/модерн, приглушенный синий акцент) */
       --bg-color: #0f1012;
       --card-bg: #18191c;
       --text-main: #f1f3f5;
@@ -30,6 +29,7 @@
       --accent-text: #ffffff;
       --border-color: rgba(255, 255, 255, 0.08);
       --badge-bg: #222428;
+      --overlay-bg: rgba(0, 0, 0, 0.7);
     }
 
     * {
@@ -84,6 +84,73 @@
       display: flex;
       align-items: center;
       gap: 4px;
+      cursor: pointer;
+      background: var(--badge-bg);
+      padding: 5px 10px;
+      border-radius: 10px;
+    }
+
+    /* Модальное окно для ввода города */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--overlay-bg);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      padding: 20px;
+      border-radius: 16px;
+      width: 85%;
+      max-width: 320px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: var(--text-main);
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-color);
+      color: var(--text-main);
+      border-radius: 10px;
+      font-size: 0.95rem;
+      outline: none;
+      margin-bottom: 14px;
+    }
+
+    .modal-btn {
+      width: 100%;
+      padding: 10px;
+      background: var(--accent);
+      color: var(--accent-text);
+      border: none;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.9rem;
       cursor: pointer;
     }
 
@@ -207,21 +274,9 @@
       letter-spacing: 0.2px;
     }
 
-    .type-1 { 
-      background: transparent; 
-      color: var(--accent); 
-      border: 1px solid var(--accent); 
-    }
-    .type-2 { 
-      background: transparent; 
-      color: #9333ea; 
-      border: 1px solid #9333ea; 
-    }
-    .type-0 { 
-      background: transparent; 
-      color: #16a34a; 
-      border: 1px solid #16a34a; 
-    }
+    .type-1 { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+    .type-2 { background: transparent; color: #9333ea; border: 1px solid #9333ea; }
+    .type-0 { background: transparent; color: #16a34a; border: 1px solid #16a34a; }
 
     .empty-state {
       text-align: center;
@@ -233,11 +288,20 @@
 </head>
 <body>
 
+<!-- Модальное окно для ввода города -->
+<div class="modal-overlay" id="cityModal">
+  <div class="modal-card">
+    <div class="modal-title">Введите ваш город</div>
+    <input type="text" id="cityInput" class="modal-input" placeholder="Например: Павлодар" value="Павлодар">
+    <button class="modal-btn" onclick="saveCityAndLoad()">Сохранить</button>
+  </div>
+</div>
+
 <div class="app-wrapper">
   <div class="container">
     <div class="status-bar">
       <span id="weekStatusText">Загрузка...</span>
-      <span class="weather-widget" id="weatherWidget" onclick="askForCity()" title="Нажмите, чтобы сменить город">🌤 Загрузка...</span>
+      <span class="weather-widget" id="weatherWidget" onclick="openCityModal()">🌤 Загрузка...</span>
     </div>
 
     <div class="nav-tabs">
@@ -250,7 +314,7 @@
       <button class="day-btn" id="btn-ПН" onclick="selectDay('Понедельник', this)">ПН</button>
       <button class="day-btn" id="btn-ВТ" onclick="selectDay('Вторник', this)">ВТ</button>
       <button class="day-btn" id="btn-СР" onclick="selectDay('Среда', this)">СР</button>
-      <button class="day-btn" id="btn-ЧТ" onclick="selectDay('Четверг', this)">ЧТ</button>
+      <button class="day-btn" id="btn-ЧТ" onclick="selectDay('Четверг', this)">Четверг</button>
     </div>
 
     <div id="scheduleContainer"></div>
@@ -263,21 +327,17 @@
   if (tg) {
     tg.ready();
     tg.expand();
-    
     const isDark = tg.colorScheme === 'dark';
     if (isDark) {
       document.documentElement.setAttribute('data-theme', 'dark');
     } else {
       document.documentElement.removeAttribute('data-theme');
     }
-
     if (tg.setHeaderColor) tg.setHeaderColor('bg_color');
     if (tg.setBackgroundColor) tg.setBackgroundColor('bg_color');
-    
     tg.onEvent('viewportChanged', () => tg.expand());
   }
 
-  // Функция геокодинга: ищет координаты по названию города через бесплатный API
   async function getCoordsByCity(cityName) {
     try {
       const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(cityName)}&count=1&language=ru&format=json`);
@@ -285,8 +345,7 @@
       if (data && data.results && data.results.length > 0) {
         return {
           lat: data.results[0].latitude,
-          lon: data.results[0].longitude,
-          name: data.results[0].name
+          lon: data.results[0].longitude
         };
       }
     } catch (e) {
@@ -300,14 +359,13 @@
     let savedCity = localStorage.getItem('user_city');
 
     if (!savedCity) {
-      savedCity = prompt("Введите ваш город для отображения погоды:", "Павлодар");
-      if (!savedCity) savedCity = "Павлодар";
-      localStorage.setItem('user_city', savedCity);
+      openCityModal();
+      return;
     }
 
     const location = await getCoordsByCity(savedCity);
     if (!location) {
-      weatherEl.innerHTML = `📍 Ошибка города`;
+      weatherEl.innerHTML = `📍 Ошибка`;
       return;
     }
 
@@ -330,11 +388,19 @@
     }
   }
 
-  // При клике на погоду можно изменить город
-  function askForCity() {
-    const newCity = prompt("Введите новый город:", localStorage.getItem('user_city') || "Павлодар");
-    if (newCity) {
-      localStorage.setItem('user_city', newCity);
+  function openCityModal() {
+    const modal = document.getElementById('cityModal');
+    const input = document.getElementById('cityInput');
+    input.value = localStorage.getItem('user_city') || 'Павлодар';
+    modal.classList.add('active');
+  }
+
+  function saveCityAndLoad() {
+    const input = document.getElementById('cityInput');
+    const cityName = input.value.trim();
+    if (cityName) {
+      localStorage.setItem('user_city', cityName);
+      document.getElementById('cityModal').classList.remove('active');
       loadWeather();
     }
   }
@@ -457,7 +523,6 @@
 
   function selectDay(dayName, btnElement) {
     selectedDay = dayName;
-    
     document.querySelectorAll('.day-btn').forEach(b => b.classList.remove('active'));
     if (btnElement) {
       btnElement.classList.add('active');
@@ -466,7 +531,6 @@
       const targetBtn = document.getElementById(`btn-${shortName}`);
       if (targetBtn) targetBtn.classList.add('active');
     }
-
     renderSchedule();
   }
 
@@ -505,7 +569,6 @@
         </div>
       `;
     });
-
     container.innerHTML = html;
   }
 
