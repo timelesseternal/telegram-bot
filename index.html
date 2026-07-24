@@ -325,7 +325,6 @@
     .type-2 { background: transparent; color: #9333ea; border: 1px solid #9333ea; }
     .type-0 { background: transparent; color: #16a34a; border: 1px solid #16a34a; }
 
-    /* Стили для УМКД карточек файлов */
     .umkd-item {
       display: flex;
       align-items: center;
@@ -408,7 +407,7 @@
       <button class="day-btn" id="btn-ПН" onclick="selectDay('Понедельник', this)">ПН</button>
       <button class="day-btn" id="btn-ВТ" onclick="selectDay('Вторник', this)">ВТ</button>
       <button class="day-btn" id="btn-СР" onclick="selectDay('Среда', this)">СР</button>
-      <button class="day-btn" id="btn-ЧТ" onclick="selectDay('Четверг', this)">Четверг</button>
+      <button class="day-btn" id="btn-ЧТ" onclick="selectDay('Четверг', this)">ЧТ</button>
     </div>
 
     <div id="scheduleContainer"></div>
@@ -485,7 +484,7 @@
   function openCityModal() {
     const modal = document.getElementById('cityModal');
     const select = document.getElementById('citySelect');
-    select.value = localStorage.getItem('user_city') || 'Павлодар';
+    select.value = localStorage.getItem('user_city') || 'Караганда';
     modal.classList.add('active');
   }
 
@@ -499,7 +498,6 @@
     }
   }
 
-  // Открытие PDF прямо в приложении
   function openPdf(title, url) {
     document.getElementById('pdfTitle').innerText = title;
     document.getElementById('pdfFrame').src = url;
@@ -513,44 +511,42 @@
 
   const SCHEDULE = {
     'Понедельник': [
-      {'пара': '1', 'sub': 'Политология (Сем)', 'teacher': 'Толеуова М. Ө.', 'room': '1к232', 'type': 2},
-      {'пара': '2', 'sub': 'Физкультура (Сем)', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
-      {'пара': '3', 'sub': 'Комп. графика (Лек)', 'teacher': 'Коккоз М. М.', 'room': 'Гк430', 'type': 1},
-      {'пара': '3', 'sub': 'Теор. вероятностей (Лаб)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к305', 'type': 2},
-      {'пара': '4', 'sub': 'Теор. вероятностей (Лаб)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к304', 'type': 1},
-      {'пара': '4', 'sub': 'Теор. вероятностей (Лек)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к304', 'type': 2}
+      {'пара': '1', 'sub': 'Политология', 'teacher': 'Толеуова М. Ө.', 'room': '1к232', 'type': 2},
+      {'пара': '2', 'sub': 'Физическая культура', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
+      {'пара': '3', 'sub': 'Компьютерная графика', 'teacher': 'Коккоз М. М.', 'room': 'Гк430', 'type': 1},
+      {'пара': '3', 'sub': 'Теория вероятностей и математическая статистика', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к305', 'type': 2},
+      {'пара': '4', 'sub': 'Теория вероятностей и математическая статистика', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к304', 'type': 1}
     ],
     'Вторник': [
-      {'пара': '1', 'sub': 'Политология (Лек)', 'teacher': 'Казбеков Н. А.', 'room': '1к209', 'type': 1},
-      {'пара': '1', 'sub': 'Психология (Лек)', 'teacher': 'Курымбаева С. К.', 'room': 'Гк420', 'type': 2},
-      {'пара': '2', 'sub': 'Комп. графика (Лаб)', 'teacher': 'Тапенова Г. С.', 'room': 'Гк400', 'type': 0}
+      {'пара': '1', 'sub': 'Политология', 'teacher': 'Казбеков Н. А.', 'room': '1к209', 'type': 1},
+      {'пара': '1', 'sub': 'Психология', 'teacher': 'Курымбаева С. К.', 'room': 'Гк420', 'type': 2},
+      {'пара': '2', 'sub': 'Компьютерная графика', 'teacher': 'Тапенова Г. С.', 'room': 'Гк400', 'type': 0}
     ],
     'Среда': [
-      {'пара': '1', 'sub': 'ООП Python (Лек)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк434', 'type': 0},
-      {'пара': '2', 'sub': 'Базы данных (Лаб)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 1},
-      {'пара': '2', 'sub': 'Базы данных (Лек)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк422', 'type': 2},
-      {'пара': '3', 'sub': 'ООП Python (Лаб)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк422', 'type': 0}
+      {'пара': '1', 'sub': 'Объектно-ориентированное программирование Python, курсовая работа', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк434', 'type': 0},
+      {'пара': '2', 'sub': 'Введение в базы данных', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 1},
+      {'пара': '3', 'sub': 'Объектно-ориентированное программирование Python, курсовая работа', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк422', 'type': 0}
     ],
     'Четверг': [
-      {'пара': '1', 'sub': 'Физкультура (Сем)', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
-      {'пара': '2', 'sub': 'Базы данных (Лаб)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 0},
-      {'пара': '3', 'sub': 'ООП Python (Лаб)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк430', 'type': 2}
+      {'пара': '1', 'sub': 'Физическая культура', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
+      {'пара': '2', 'sub': 'Введение в базы данных', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 0},
+      {'пара': '3', 'sub': 'Объектно-ориентированное программирование Python, курсовая работа', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк430', 'type': 2}
     ]
   };
 
   const EXAMS = [
-    { date: '12 мая (ВТ)', time: '09:00', sub: 'Комп. графика', teacher: 'Коккоз М. М.', room: 'Главный корпус, 422б' },
+    { date: '12 мая (ВТ)', time: '09:00', sub: 'Компьютерная графика', teacher: 'Коккоз М. М.', room: 'Главный корпус, 422б' },
     { date: '15 мая (ПТ)', time: '09:00', sub: 'Психология', teacher: 'Курымбаева С. К.', room: 'Корпус №1, 232' },
     { date: '15 мая (ПТ)', time: '09:00', sub: 'Политология', teacher: 'Казбеков Н. А.', room: 'Корпус №1, 232' },
-    { date: '18 мая (ПН)', time: '09:00', sub: 'Базы данных', teacher: 'Кәмен Е. Ғ.', room: 'Главный корпус, 421' },
-    { date: '21 мая (ЧТ)', time: '09:00', sub: 'Теор. вероятностей', teacher: 'Бекмагамбетова Э. К.', room: 'Корпус №1, 312' }
+    { date: '18 мая (ПН)', time: '09:00', sub: 'Введение в базы данных', teacher: 'Кәмен Е. Ғ.', room: 'Главный корпус, 421' },
+    { date: '21 мая (ЧТ)', time: '09:00', sub: 'Теория вероятностей и математическая статистика', teacher: 'Бекмагамбетова Э. К.', room: 'Корпус №1, 312' }
   ];
 
-  // Данные УМКД (сюда можешь закинуть свои ссылки на PDF)
+  // Точный список УМКД по твоим дисциплинам со скриншота
   const UMKD_FILES = {
     'Введение в базы данных': [
-      { name: '📄 Лекция №1: SQL Basics', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-      { name: '📄 Методичка к лабораторным', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+      { name: '📄 Лекционный материал', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { name: '📄 Методичка к лабам', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ],
     'Компьютерная графика': [
       { name: '📄 Конспект лекций', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
@@ -559,13 +555,17 @@
       { name: '📄 Учебное пособие', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ],
     'Психология': [
-      { name: '📄 Лекционный материал', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+      { name: '📄 Материалы по предмету', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ],
     'Теория вероятностей и математическая статистика': [
-      { name: '📄 Формулы и примеры', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+      { name: '📄 Формулы и задачи', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+    ],
+    'Физическая культура': [
+      { name: '📄 Методические указания', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ],
     'Объектно-ориентированное программирование Python, курсовая работа': [
-      { name: '📄 Методичка по курсовой', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+      { name: '📄 Методичка по курсовой', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
+      { name: '📄 Примеры кода', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ]
   };
 
@@ -630,7 +630,7 @@
     } else if (currentMode === 'exams') {
       statusText.innerHTML = `📌 <b>Экзамены</b>`;
     } else {
-      statusText.innerHTML = `📂 <b>УМКД Маяки</b>`;
+      statusText.innerHTML = `📂 <b>УМКД Дисциплины</b>`;
     }
   }
 
