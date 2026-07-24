@@ -503,6 +503,46 @@
 </div>
 
 <script>
+  // Регистрация Service Worker для работы оффлайн
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      const CACHE_NAME = 'univer-pwa-v1';
+      self.addEventListener('install', (e) => {
+        self.skipWaiting();
+      });
+      self.addEventListener('activate', (e) => {
+        e.waitUntil(clients.claim());
+      });
+      self.addEventListener('fetch', (e) => {
+        e.respondWith(
+          caches.match(e.request).then((cachedResponse) => {
+            if (cachedResponse) {
+              // Фоновое обновление кэша для внешних запросов (погода и т.д.)
+              fetch(e.request).then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200) {
+                  caches.open(CACHE_NAME).then((cache) => cache.put(e.request, networkResponse));
+                }
+              }).catch(() => {});
+              return cachedResponse;
+            }
+            return fetch(e.request).then((networkResponse) => {
+              return caches.open(CACHE_NAME).then((cache) => {
+                cache.put(e.request, networkResponse.clone());
+                return networkResponse;
+              });
+            }).catch(() => {
+              // Если сети нет и ресурса нет в кэше, отдаем главную страницу
+              return caches.match('./');
+            });
+          })
+        );
+      });
+    `;
+    const swBlob = new Blob([swCode], { type: 'text/javascript' });
+    const swUrl = URL.createObjectURL(swBlob);
+    navigator.serviceWorker.register(swUrl).catch(err => console.log('SW error', err));
+  }
+
   const tg = window.Telegram ? window.Telegram.WebApp : null;
 
   if (tg) {
