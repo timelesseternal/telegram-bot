@@ -16,7 +16,7 @@
 
   <style>
     :root {
-      --bg-color: #f8f9fa;
+      --bg-color: #f2f4f7;
       --card-bg: #ffffff;
       --text-main: #1a1a1a;
       --text-muted: #555555;
@@ -24,14 +24,23 @@
       --accent-text: #ffffff;
       --border-color: rgba(0, 0, 0, 0.08);
       --badge-bg: #f1f3f5;
-      --overlay-bg: rgba(0, 0, 0, 0.5);
+      --overlay-bg: rgba(0, 0, 0, 0.35);
       --highlight-border: #0066cc;
-      --highlight-bg: rgba(0, 102, 204, 0.03);
-      --progress-bg: rgba(0, 102, 204, 0.1);
+      --highlight-bg: rgba(0, 102, 204, 0.05);
+      --progress-bg: rgba(0, 102, 204, 0.12);
+
+      /* Liquid-glass tokens */
+      --glass-bg: rgba(255, 255, 255, 0.5);
+      --glass-bg-strong: rgba(255, 255, 255, 0.68);
+      --glass-border: rgba(255, 255, 255, 0.65);
+      --glass-highlight: rgba(255, 255, 255, 0.85);
+      --glass-shadow: rgba(31, 41, 55, 0.10);
+      --glass-blur: 22px;
+      --ambient-opacity: 0.55;
     }
 
     [data-theme="dark"] {
-      --bg-color: #0f1012;
+      --bg-color: #0b0c0e;
       --card-bg: #18191c;
       --text-main: #f1f3f5;
       --text-muted: #9ba1a6;
@@ -39,10 +48,17 @@
       --accent-text: #ffffff;
       --border-color: rgba(255, 255, 255, 0.08);
       --badge-bg: #222428;
-      --overlay-bg: rgba(0, 0, 0, 0.7);
+      --overlay-bg: rgba(0, 0, 0, 0.55);
       --highlight-border: #3388ff;
-      --highlight-bg: rgba(51, 136, 255, 0.06);
-      --progress-bg: rgba(51, 136, 255, 0.15);
+      --highlight-bg: rgba(51, 136, 255, 0.08);
+      --progress-bg: rgba(51, 136, 255, 0.18);
+
+      --glass-bg: rgba(30, 32, 36, 0.55);
+      --glass-bg-strong: rgba(30, 32, 36, 0.72);
+      --glass-border: rgba(255, 255, 255, 0.10);
+      --glass-highlight: rgba(255, 255, 255, 0.08);
+      --glass-shadow: rgba(0, 0, 0, 0.45);
+      --ambient-opacity: 0.35;
     }
 
     * {
@@ -50,7 +66,7 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-    
+
     html, body {
       background-color: var(--bg-color);
       color: var(--text-main);
@@ -59,7 +75,32 @@
       width: 100%;
       height: 100%;
       overflow-x: hidden;
-      transition: background-color 0.2s ease, color 0.2s ease;
+      transition: background-color 0.3s ease, color 0.3s ease;
+      position: relative;
+    }
+
+    /* Ambient backdrop so the glass surfaces have something to refract */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: -10%;
+      z-index: -1;
+      opacity: var(--ambient-opacity);
+      background:
+        radial-gradient(circle at 18% 15%, rgba(0, 102, 204, 0.45), transparent 42%),
+        radial-gradient(circle at 82% 12%, rgba(147, 51, 234, 0.32), transparent 46%),
+        radial-gradient(circle at 25% 85%, rgba(22, 163, 74, 0.28), transparent 42%),
+        radial-gradient(circle at 85% 80%, rgba(255, 153, 51, 0.22), transparent 45%);
+      filter: blur(70px);
+      animation: ambientDrift 24s ease-in-out infinite alternate;
+      pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+
+    @keyframes ambientDrift {
+      0%   { transform: scale(1) translate(0, 0) rotate(0deg); }
+      50%  { transform: scale(1.12) translate(-2%, 3%) rotate(4deg); }
+      100% { transform: scale(1.2) translate(3%, -2%) rotate(-3deg); }
     }
 
     .app-wrapper {
@@ -76,18 +117,21 @@
     }
 
     .status-bar {
-      background: var(--card-bg);
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(180%);
       color: var(--text-main);
       padding: 12px 14px;
-      border-radius: 14px;
+      border-radius: 18px;
       font-size: 0.85rem;
       font-weight: 600;
       margin-bottom: 12px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-      border: 1px solid var(--border-color);
+      box-shadow: 0 8px 28px var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+      border: 1px solid var(--glass-border);
+      transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
 
     .status-info-left {
@@ -100,6 +144,7 @@
       font-size: 0.75rem;
       color: var(--accent);
       font-weight: 500;
+      transition: opacity 0.25s ease;
     }
 
     .header-right-block {
@@ -116,26 +161,33 @@
       align-items: center;
       gap: 4px;
       cursor: pointer;
-      background: var(--badge-bg);
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      backdrop-filter: blur(16px) saturate(160%);
+      border: 1px solid var(--glass-border);
       padding: 5px 10px;
-      border-radius: 10px;
+      border-radius: 12px;
       white-space: nowrap;
+      transition: transform 0.25s cubic-bezier(.25,.8,.25,1), background-color 0.3s ease;
     }
+    .weather-widget:active { transform: scale(0.94); }
 
     .today-btn {
       font-size: 0.78rem;
       font-weight: 600;
       color: var(--accent-text);
-      background: var(--accent);
+      background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
       padding: 6px 10px;
-      border-radius: 10px;
+      border-radius: 12px;
       border: none;
       cursor: pointer;
       display: none;
       align-items: center;
       gap: 3px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 14px rgba(0,102,204,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+      transition: transform 0.25s cubic-bezier(.25,.8,.25,1), opacity 0.25s ease;
     }
+    .today-btn:active { transform: scale(0.92); }
 
     .modal-overlay {
       position: fixed;
@@ -144,13 +196,15 @@
       width: 100%;
       height: 100%;
       background: var(--overlay-bg);
+      -webkit-backdrop-filter: blur(4px);
+      backdrop-filter: blur(4px);
       display: flex;
       justify-content: center;
       align-items: center;
       z-index: 1000;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.2s ease;
+      transition: opacity 0.25s ease;
     }
 
     .modal-overlay.active {
@@ -159,14 +213,21 @@
     }
 
     .modal-card {
-      background: var(--card-bg);
+      background: var(--glass-bg-strong);
+      -webkit-backdrop-filter: blur(30px) saturate(180%);
+      backdrop-filter: blur(30px) saturate(180%);
       padding: 20px;
-      border-radius: 16px;
+      border-radius: 20px;
       width: 85%;
       max-width: 320px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      border: 1px solid var(--border-color);
+      box-shadow: 0 20px 45px rgba(0,0,0,0.18), inset 0 1px 0 var(--glass-highlight);
+      border: 1px solid var(--glass-border);
       text-align: center;
+      transform: scale(0.92) translateY(8px);
+      transition: transform 0.3s cubic-bezier(.34,1.4,.64,1);
+    }
+    .modal-overlay.active .modal-card {
+      transform: scale(1) translateY(0);
     }
 
     .modal-title {
@@ -182,7 +243,7 @@
       border: 1px solid var(--border-color);
       background: var(--bg-color);
       color: var(--text-main);
-      border-radius: 10px;
+      border-radius: 12px;
       font-size: 0.95rem;
       outline: none;
       margin-bottom: 14px;
@@ -198,11 +259,13 @@
       flex: 1;
       padding: 10px;
       border: none;
-      border-radius: 10px;
+      border-radius: 12px;
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
+      transition: transform 0.2s cubic-bezier(.25,.8,.25,1);
     }
+    .modal-btn:active { transform: scale(0.94); }
 
     .modal-btn.cancel {
       background: var(--badge-bg);
@@ -216,58 +279,99 @@
     }
 
     .nav-tabs {
+      position: relative;
       display: flex;
       gap: 6px;
       margin-bottom: 12px;
       width: 100%;
     }
 
+    .tab-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 0;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
+      box-shadow: 0 4px 16px rgba(0,102,204,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+      transition: transform 0.4s cubic-bezier(.34,1.4,.64,1), width 0.4s cubic-bezier(.34,1.4,.64,1);
+      z-index: 0;
+      pointer-events: none;
+    }
+
     .tab-btn {
+      position: relative;
+      z-index: 1;
       flex: 1;
       padding: 10px 4px;
-      border: 1px solid var(--border-color);
-      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(180%);
       color: var(--text-muted);
-      border-radius: 12px;
+      border-radius: 14px;
       font-weight: 600;
       cursor: pointer;
       font-size: 0.8rem;
       white-space: nowrap;
       text-align: center;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      box-shadow: inset 0 1px 0 var(--glass-highlight);
+      transition: transform 0.25s cubic-bezier(.25,.8,.25,1), color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
     }
+    .tab-btn:active { transform: scale(0.94); }
 
     .tab-btn.active {
-      background: var(--accent) !important;
+      background: transparent !important;
       color: var(--accent-text) !important;
-      border-color: var(--accent) !important;
+      border-color: transparent !important;
     }
 
     .days-grid {
+      position: relative;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
       margin-bottom: 14px;
     }
 
+    .day-indicator {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-radius: 14px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
+      box-shadow: 0 4px 16px rgba(0,102,204,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+      transition: transform 0.4s cubic-bezier(.34,1.4,.64,1), width 0.4s ease, height 0.4s ease;
+      z-index: 0;
+      pointer-events: none;
+    }
+
     .day-btn {
+      position: relative;
+      z-index: 1;
       padding: 10px 0;
-      border: 1px solid var(--border-color);
-      background: var(--card-bg);
+      border: 1px solid var(--glass-border);
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(180%);
       color: var(--text-main);
-      border-radius: 12px;
+      border-radius: 14px;
       font-weight: 600;
       cursor: pointer;
       text-align: center;
       font-size: 0.85rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-      position: relative;
+      box-shadow: inset 0 1px 0 var(--glass-highlight);
+      transition: transform 0.25s cubic-bezier(.25,.8,.25,1), color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease;
     }
+    .day-btn:active { transform: scale(0.92); }
 
     .day-btn.active {
-      background: var(--accent) !important;
+      background: transparent !important;
       color: var(--accent-text) !important;
-      border-color: var(--accent) !important;
+      border-color: transparent !important;
     }
 
     .day-btn.is-today::after {
@@ -280,27 +384,41 @@
       height: 4px;
       background-color: var(--accent);
       border-radius: 50%;
+      z-index: 2;
     }
     .day-btn.active.is-today::after {
       background-color: var(--accent-text);
     }
 
+    #scheduleContainer {
+      transition: opacity 0.28s ease, transform 0.32s cubic-bezier(.25,.8,.25,1);
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+    #scheduleContainer.content-hidden {
+      opacity: 0;
+      transform: translateY(10px) scale(0.99);
+    }
+
     .card {
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
+      border: 1px solid var(--glass-border);
+      border-radius: 18px;
       padding: 14px;
       margin-bottom: 10px;
-      background: var(--card-bg);
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(180%);
       color: var(--text-main);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
-      transition: all 0.2s ease;
+      box-shadow: 0 8px 26px var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+      transition: transform 0.3s cubic-bezier(.25,.8,.25,1), box-shadow 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
       position: relative;
       overflow: hidden;
     }
+    .card:active { transform: scale(0.985); }
 
     .card.current-active {
-      border: 2px solid var(--highlight-border);
-      background: var(--highlight-bg);
+      border: 1.5px solid var(--highlight-border);
+      background: linear-gradient(160deg, var(--highlight-bg), var(--glass-bg));
     }
 
     .lesson-progress-container {
@@ -386,17 +504,20 @@
       align-items: center;
       justify-content: space-between;
       padding: 14px;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      backdrop-filter: blur(var(--glass-blur)) saturate(180%);
+      border: 1px solid var(--glass-border);
+      border-radius: 16px;
       margin-bottom: 10px;
       cursor: pointer;
       font-size: 0.95rem;
       font-weight: 600;
       color: var(--text-main);
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
-      transition: border-color 0.2s;
+      box-shadow: 0 8px 22px var(--glass-shadow), inset 0 1px 0 var(--glass-highlight);
+      transition: transform 0.25s cubic-bezier(.25,.8,.25,1), border-color 0.3s ease;
     }
+    .umkd-subject-card:active { transform: scale(0.98); }
 
     .umkd-subject-card:hover {
       border-color: var(--accent);
@@ -407,32 +528,48 @@
       align-items: center;
       justify-content: space-between;
       padding: 10px 12px;
-      background: var(--badge-bg);
-      border-radius: 10px;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      backdrop-filter: blur(16px) saturate(160%);
+      border-radius: 12px;
       margin-top: 8px;
       cursor: pointer;
       font-size: 0.9rem;
       font-weight: 500;
       color: var(--text-main);
-      border: 1px solid var(--border-color);
+      border: 1px solid var(--glass-border);
+      transition: transform 0.25s cubic-bezier(.25,.8,.25,1);
     }
+    .umkd-item:active { transform: scale(0.97); }
 
     .back-btn {
-      background: var(--badge-bg);
-      border: none;
+      background: var(--glass-bg);
+      -webkit-backdrop-filter: blur(16px) saturate(160%);
+      backdrop-filter: blur(16px) saturate(160%);
+      border: 1px solid var(--glass-border);
       color: var(--text-main);
       padding: 6px 12px;
-      border-radius: 8px;
+      border-radius: 10px;
       font-weight: 600;
       cursor: pointer;
       font-size: 0.85rem;
+      transition: transform 0.25s cubic-bezier(.25,.8,.25,1);
     }
+    .back-btn:active { transform: scale(0.94); }
 
     .empty-state {
       text-align: center;
       padding: 40px 10px;
       color: var(--text-muted);
       font-size: 0.95rem;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+      }
     }
   </style>
 </head>
@@ -484,7 +621,8 @@
       </div>
     </div>
 
-    <div class="nav-tabs">
+    <div class="nav-tabs" id="navTabs">
+      <div class="tab-indicator" id="tabIndicator"></div>
       <button class="tab-btn active" id="tabCurrent" onclick="switchWeek('current')">Текущая</button>
       <button class="tab-btn" id="tabNext" onclick="switchWeek('next')">Следующая</button>
       <button class="tab-btn" id="tabExams" onclick="switchWeek('exams')">Экзамены</button>
@@ -492,6 +630,7 @@
     </div>
 
     <div class="days-grid" id="daysGrid">
+      <div class="day-indicator" id="dayIndicator"></div>
       <button class="day-btn" id="btn-ПН" onclick="selectDay('Понедельник', this)">ПН</button>
       <button class="day-btn" id="btn-ВТ" onclick="selectDay('Вторник', this)">ВТ</button>
       <button class="day-btn" id="btn-СР" onclick="selectDay('Среда', this)">СР</button>
@@ -593,7 +732,7 @@
       const data = await response.json();
       const temp = Math.round(data.current.temperature_2m);
       const code = data.current.weather_code;
-      
+
       let emoji = '🌤';
       if (code === 0) emoji = '☀️';
       else if (code >= 1 && code <= 3) emoji = '⛅';
@@ -635,6 +774,65 @@
       window.open(url, '_blank');
     }
   }
+
+  // ---- Smooth content transition helper ----
+  // animate=false is used for the once-a-second live refresh (progress bar / timer),
+  // so the schedule only fades when the user actually switches tab/day.
+  function swapContent(container, html, animate = true) {
+    if (!animate) {
+      container.innerHTML = html;
+      return;
+    }
+    container.classList.add('content-hidden');
+    setTimeout(() => {
+      container.innerHTML = html;
+      requestAnimationFrame(() => {
+        container.classList.remove('content-hidden');
+      });
+    }, 180);
+  }
+
+  // ---- Sliding glass indicators for tabs / days ----
+  function updateTabIndicator() {
+    const activeBtn = document.querySelector('.tab-btn.active');
+    const indicator = document.getElementById('tabIndicator');
+    if (activeBtn && indicator) {
+      indicator.style.width = activeBtn.offsetWidth + 'px';
+      indicator.style.transform = `translateX(${activeBtn.offsetLeft}px)`;
+    }
+  }
+
+  function updateDayIndicator() {
+    const activeBtn = document.querySelector('.day-btn.active');
+    const indicator = document.getElementById('dayIndicator');
+    const daysGrid = document.getElementById('daysGrid');
+    if (activeBtn && indicator && daysGrid.style.display !== 'none') {
+      indicator.style.width = activeBtn.offsetWidth + 'px';
+      indicator.style.height = activeBtn.offsetHeight + 'px';
+      indicator.style.transform = `translate(${activeBtn.offsetLeft}px, ${activeBtn.offsetTop}px)`;
+      indicator.style.opacity = '1';
+    } else if (indicator) {
+      indicator.style.opacity = '0';
+    }
+  }
+
+  function initIndicatorsNoAnim() {
+    const tabIndicator = document.getElementById('tabIndicator');
+    const dayIndicator = document.getElementById('dayIndicator');
+    [tabIndicator, dayIndicator].forEach(el => el.style.transition = 'none');
+    updateTabIndicator();
+    updateDayIndicator();
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        [tabIndicator, dayIndicator].forEach(el => el.style.transition = '');
+      });
+    });
+  }
+
+  window.addEventListener('resize', () => {
+    updateTabIndicator();
+    updateDayIndicator();
+  });
 
   const SCHEDULE = {
     'Понедельник': [
@@ -839,6 +1037,7 @@
     if (mode === 'next') document.getElementById('tabNext').classList.add('active');
     if (mode === 'exams') document.getElementById('tabExams').classList.add('active');
     if (mode === 'umkd') document.getElementById('tabUmkd').classList.add('active');
+    updateTabIndicator();
 
     const daysGrid = document.getElementById('daysGrid');
     if (mode === 'exams' || mode === 'umkd') {
@@ -849,6 +1048,7 @@
       daysGrid.style.display = 'grid';
       renderSchedule();
     }
+    updateDayIndicator();
     updateStatusBarAndLive();
   }
 
@@ -862,11 +1062,12 @@
       const targetBtn = document.getElementById(`btn-${shortName}`);
       if (targetBtn) targetBtn.classList.add('active');
     }
+    updateDayIndicator();
     renderSchedule();
     updateStatusBarAndLive();
   }
 
-  function renderSchedule() {
+  function renderSchedule(animate = true) {
     const container = document.getElementById('scheduleContainer');
     const currentWeekType = getWeekType();
     let targetWeek = currentMode === 'next' ? (currentWeekType === 1 ? 2 : 1) : currentWeekType;
@@ -875,7 +1076,7 @@
     const filteredLessons = dayLessons.filter(l => l.type === 0 || l.type === targetWeek);
 
     if (filteredLessons.length === 0) {
-      container.innerHTML = '<div class="empty-state">🎉 На этот день пар нет!</div>';
+      swapContent(container, '<div class="empty-state">🎉 На этот день пар нет!</div>', animate);
       return;
     }
 
@@ -936,7 +1137,7 @@
         </div>
       `;
     });
-    container.innerHTML = html;
+    swapContent(container, html, animate);
   }
 
   function renderExams() {
@@ -957,7 +1158,7 @@
         </div>
       `;
     });
-    container.innerHTML = html;
+    swapContent(container, html);
   }
 
   function renderUmkdSubjects() {
@@ -972,7 +1173,7 @@
         </div>
       `;
     }
-    container.innerHTML = html;
+    swapContent(container, html);
   }
 
   function selectUmkdSubject(subjectName) {
@@ -990,7 +1191,7 @@
       `;
     });
 
-    container.innerHTML = `
+    const html = `
       <button class="back-btn" style="margin-bottom: 12px; padding: 8px 14px;" onclick="renderUmkdSubjects()">← Назад к списку дисциплин</button>
       <div class="card">
         <div class="subject-title" style="font-size: 1.05rem; margin-bottom: 10px;">📚 ${subjectName}</div>
@@ -999,6 +1200,7 @@
         </div>
       </div>
     `;
+    swapContent(container, html);
   }
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -1006,11 +1208,12 @@
     updateStatusBarAndLive();
     selectDay(selectedDay, null);
     loadWeather();
+    initIndicatorsNoAnim();
 
     setInterval(() => {
       updateStatusBarAndLive();
       if (currentMode === 'current') {
-        renderSchedule();
+        renderSchedule(false);
       }
     }, 1000);
   });
