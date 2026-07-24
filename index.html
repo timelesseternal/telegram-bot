@@ -378,26 +378,26 @@
   <div class="modal-card">
     <div class="modal-title">Выберите ваш город</div>
     <select id="citySelect" class="modal-select">
-      <option value="Астана">Астана</option>
-      <option value="Алматы">Алматы</option>
-      <option value="Шымкент">Шымкент</option>
       <option value="Актау">Актау</option>
       <option value="Актобе">Актобе</option>
+      <option value="Алматы">Алматы</option>
+      <option value="Астана">Астана</option>
       <option value="Атырау">Атырау</option>
-      <option value="Уральск">Уральск</option>
-      <option value="Кокшетау">Кокшетау</option>
-      <option value="Костанай">Костанай</option>
-      <option value="Павлодар">Павлодар</option>
-      <option value="Петропавловск">Петропавловск</option>
       <option value="Жезказган">Жезказган</option>
       <option value="Караганда">Караганда</option>
+      <option value="Кокшетау">Кокшетау</option>
+      <option value="Костанай">Костанай</option>
       <option value="Конаев">Конаев</option>
       <option value="Кызылорда">Кызылорда</option>
+      <option value="Павлодар">Павлодар</option>
+      <option value="Петропавловск">Петропавловск</option>
+      <option value="Семей">Семей</option>
       <option value="Талдыкорган">Талдыкорган</option>
       <option value="Тараз">Тараз</option>
-      <option value="Семей">Семей</option>
       <option value="Туркестан">Туркестан</option>
+      <option value="Уральск">Уральск</option>
       <option value="Усть-Каменогорск">Усть-Каменогорск</option>
+      <option value="Шымкент">Шымкент</option>
       <option value="Ұлытау">Ұлытау</option>
     </select>
     <div class="modal-buttons">
@@ -430,7 +430,7 @@
       <button class="day-btn" id="btn-ПН" onclick="selectDay('Понедельник', this)">ПН</button>
       <button class="day-btn" id="btn-ВТ" onclick="selectDay('Вторник', this)">ВТ</button>
       <button class="day-btn" id="btn-СР" onclick="selectDay('Среда', this)">СР</button>
-      <button class="day-btn" id="btn-ЧТ" onclick="selectDay('ЧТ', this)">ЧТ</button>
+      <button class="day-btn" id="btn-ЧТ" onclick="selectDay('Четверг', this)">ЧТ</button>
     </div>
 
     <div id="scheduleContainer"></div>
@@ -507,7 +507,7 @@
   function openCityModal() {
     const modal = document.getElementById('cityModal');
     const select = document.getElementById('citySelect');
-    select.value = localStorage.getItem('user_city') || 'Астана';
+    select.value = localStorage.getItem('user_city') || 'Павлодар';
     modal.classList.add('active');
   }
 
@@ -535,28 +535,28 @@
 
   const SCHEDULE = {
     'Понедельник': [
-      {'пара': '1', 'sub': 'Политология (Семинар)', 'teacher': 'Толеуова М. Ө.', 'room': '1к232', 'type': 0},
-      {'пара': '2', 'sub': 'Физическая культура (Семинар)', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
-      {'пара': '3', 'sub': 'Компьютерная графика (Лекция)', 'teacher': 'Коккоз М. М.', 'room': 'Гк430', 'type': 1},
-      {'пара': '3', 'sub': 'Теор. вер. и мат. стат. (Лабораторное)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к305', 'type': 2},
-      {'пара': '4', 'sub': 'Теор. вер. и мат. стат. (Лабораторное)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к304', 'type': 1},
-      {'пара': '5', 'sub': 'Теор. вер. и мат. стат. (Лекция)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к304', 'type': 2}
+      {'пара': '1', 'sub': 'Политология (Сем)', 'teacher': 'Толеуова М. Ө.', 'room': '1к232', 'type': 2},
+      {'пара': '2', 'sub': 'Физкультура (Сем)', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
+      {'пара': '3', 'sub': 'Комп. графика (Лек)', 'teacher': 'Коккоз М. М.', 'room': 'Гк430', 'type': 1},
+      {'пара': '3', 'sub': 'Теор. вероятностей (Лаб)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к305', 'type': 2},
+      {'пара': '4', 'sub': 'Теор. вероятностей (Лаб)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к304', 'type': 1},
+      {'пара': '4', 'sub': 'Теор. вероятностей (Лек)', 'teacher': 'Бекмагамбетова Э. К.', 'room': '1к304', 'type': 2}
     ],
     'Вторник': [
-      {'пара': '1', 'sub': 'Политология (Лекция)', 'teacher': 'Казбеков Н. А.', 'room': '1к209', 'type': 1},
-      {'пара': '1', 'sub': 'Психология (Лекция)', 'teacher': 'Курымбаева С. К.', 'room': 'Гк420', 'type': 2},
-      {'пара': '2', 'sub': 'Компьютерная графика (Лабораторное)', 'teacher': 'Тапенова Г. С.', 'room': 'Гк400', 'type': 0}
+      {'пара': '1', 'sub': 'Политология (Лек)', 'teacher': 'Казбеков Н. А.', 'room': '1к209', 'type': 1},
+      {'пара': '1', 'sub': 'Психология (Лек)', 'teacher': 'Курымбаева С. К.', 'room': 'Гк420', 'type': 2},
+      {'пара': '2', 'sub': 'Комп. графика (Лаб)', 'teacher': 'Тапенова Г. С.', 'room': 'Гк400', 'type': 0}
     ],
     'Среда': [
-      {'пара': '1', 'sub': 'ООП Python, курсовая работа (Лекция)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк434', 'type': 0},
-      {'пара': '2', 'sub': 'Введение в базы данных (Лекция)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк422', 'type': 2},
-      {'пара': '2', 'sub': 'Введение в базы данных (Лабораторное)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 1},
-      {'пара': '3', 'sub': 'ООП Python, курсовая работа (Лабораторное)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк422', 'type': 0}
+      {'пара': '1', 'sub': 'ООП Python (Лек)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк434', 'type': 0},
+      {'пара': '2', 'sub': 'Базы данных (Лаб)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 1},
+      {'пара': '2', 'sub': 'Базы данных (Лек)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк422', 'type': 2},
+      {'пара': '3', 'sub': 'ООП Python (Лаб)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк422', 'type': 0}
     ],
-    'ЧТ': [
-      {'пара': '1', 'sub': 'Физическая культура (Семинар)', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
-      {'пара': '2', 'sub': 'Введение в базы данных (Лабораторное)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 0},
-      {'пара': '3', 'sub': 'ООП Python, курсовая работа (Лабораторное)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк430', 'type': 2}
+    'Четверг': [
+      {'пара': '1', 'sub': 'Физкультура (Сем)', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
+      {'пара': '2', 'sub': 'Базы данных (Лаб)', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 0},
+      {'пара': '3', 'sub': 'ООП Python (Лаб)', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк430', 'type': 2}
     ]
   };
 
@@ -569,7 +569,7 @@
   ];
 
   const UMKD_FILES = {
-    'Введение в БД': [
+    'Базы данных': [
       { name: '📄 Лекционный материал', url: 'https://drive.google.com/file/d/1zsB7AcneyRz2VCc2KzC9MdivVxKIGFOV/preview' }
     ],
     'Комп. графика': [
@@ -581,10 +581,10 @@
     'Психология': [
       { name: '📄 Материалы по предмету', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ],
-    'Теор. вер. и мат. стат.': [
+    'Теор. вероятностей': [
       { name: '📄 Формулы и задачи', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ],
-    'Физра': [
+    'Физкультура': [
       { name: '📄 Методические указания', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ],
     'ООП Python': [
@@ -634,7 +634,7 @@
       case 1: realTodayName = 'Понедельник'; break;
       case 2: realTodayName = 'Вторник'; break;
       case 3: realTodayName = 'Среда'; break;
-      case 4: realTodayName = 'ЧТ'; break;
+      case 4: realTodayName = 'Четверг'; break;
       default: realTodayName = 'Понедельник'; break;
     }
     selectedDay = realTodayName;
@@ -645,7 +645,7 @@
       'Понедельник': 'ПН',
       'Вторник': 'ВТ',
       'Среда': 'СР',
-      'ЧТ': 'ЧТ'
+      'Четверг': 'ЧТ'
     };
     return shortNames[fullDay] || 'ПН';
   }
