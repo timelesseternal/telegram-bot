@@ -143,16 +143,30 @@
       cursor: pointer;
     }
 
+    .modal-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
     .modal-btn {
-      width: 100%;
+      flex: 1;
       padding: 10px;
-      background: var(--accent);
-      color: var(--accent-text);
       border: none;
       border-radius: 10px;
       font-weight: 600;
       font-size: 0.9rem;
       cursor: pointer;
+    }
+
+    .modal-btn.cancel {
+      background: var(--badge-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border-color);
+    }
+
+    .modal-btn.save {
+      background: var(--accent);
+      color: var(--accent-text);
     }
 
     /* Модальное окно просмотра PDF */
@@ -395,7 +409,10 @@
       <option value="Актау">Актау</option>
       <option value="Экибастуз">Экибастуз</option>
     </select>
-    <button class="modal-btn" onclick="saveCityAndLoad()">Сохранить</button>
+    <div class="modal-buttons">
+      <button class="modal-btn cancel" onclick="closeCityModal()">Отменить</button>
+      <button class="modal-btn save" onclick="saveCityAndLoad()">Сохранить</button>
+    </div>
   </div>
 </div>
 
@@ -428,7 +445,7 @@
       <button class="day-btn" id="btn-ПН" onclick="selectDay('Понедельник', this)">ПН</button>
       <button class="day-btn" id="btn-ВТ" onclick="selectDay('Вторник', this)">ВТ</button>
       <button class="day-btn" id="btn-СР" onclick="selectDay('Среда', this)">СР</button>
-      <button class="day-btn" id="btn-ЧТ" onclick="selectDay('Четверг', this)">ЧТ</button>
+      <button class="day-btn" id="btn-ЧТ" onclick="selectDay('ЧТ', this)">ЧТ</button>
     </div>
 
     <div id="scheduleContainer"></div>
@@ -505,8 +522,12 @@
   function openCityModal() {
     const modal = document.getElementById('cityModal');
     const select = document.getElementById('citySelect');
-    select.value = localStorage.getItem('user_city') || 'Караганда';
+    select.value = localStorage.getItem('user_city') || 'Павлодар';
     modal.classList.add('active');
+  }
+
+  function closeCityModal() {
+    document.getElementById('cityModal').classList.remove('active');
   }
 
   function saveCityAndLoad() {
@@ -514,7 +535,7 @@
     const cityName = select.value;
     if (cityName) {
       localStorage.setItem('user_city', cityName);
-      document.getElementById('cityModal').classList.remove('active');
+      closeCityModal();
       loadWeather();
     }
   }
@@ -548,7 +569,7 @@
       {'пара': '2', 'sub': 'Введение в базы данных', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 1},
       {'пара': '3', 'sub': 'Объектно-ориентированное программирование Python, курсовая работа', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк422', 'type': 0}
     ],
-    'Четверг': [
+    'ЧТ': [
       {'пара': '1', 'sub': 'Физическая культура', 'teacher': 'Окасов Е. А.', 'room': 'Спорт', 'type': 0},
       {'пара': '2', 'sub': 'Введение в базы данных', 'teacher': 'Кәмен Е. Ғ.', 'room': 'Гк400', 'type': 0},
       {'пара': '3', 'sub': 'Объектно-ориентированное программирование Python, курсовая работа', 'teacher': 'Аубакирова А. Е.', 'room': 'Гк430', 'type': 2}
@@ -565,7 +586,7 @@
 
   const UMKD_FILES = {
     'Введение в БД': [
-      { name: '📄 ЛР1_Turtle_Разные_объекты', url: 'https://drive.google.com/file/d/1zsB7AcneyRz2VCc2KzC9MdivVxKIGFOV/preview' }
+      { name: '📄 Лекционный материал', url: 'https://drive.google.com/file/d/1zsB7AcneyRz2VCc2KzC9MdivVxKIGFOV/preview' }
     ],
     'Комп. графика': [
       { name: '📄 Конспект лекций', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
@@ -583,8 +604,7 @@
       { name: '📄 Методические указания', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ],
     'ООП Python, курсовая работа': [
-      { name: '📄 Методичка по курсовой', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
-      { name: '📄 Примеры кода', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
+      { name: '📄 Методичка по курсовой', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' }
     ]
   };
 
@@ -622,7 +642,7 @@
       case 1: selectedDay = 'Понедельник'; break;
       case 2: selectedDay = 'Вторник'; break;
       case 3: selectedDay = 'Среда'; break;
-      case 4: selectedDay = 'Четверг'; break;
+      case 4: selectedDay = 'ЧТ'; break;
       default: selectedDay = 'Понедельник'; break;
     }
   }
@@ -632,7 +652,7 @@
       'Понедельник': 'ПН',
       'Вторник': 'ВТ',
       'Среда': 'СР',
-      'Четверг': 'ЧТ'
+      'ЧТ': 'ЧТ'
     };
     return shortNames[fullDay] || 'ПН';
   }
@@ -656,7 +676,7 @@
 
   function switchWeek(mode) {
     currentMode = mode;
-    selectedUmkdSubject = null; // сбрасываем выбор при смене вкладки
+    selectedUmkdSubject = null;
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     if (mode === 'current') document.getElementById('tabCurrent').classList.add('active');
     if (mode === 'next') document.getElementById('tabNext').classList.add('active');
