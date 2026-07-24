@@ -169,52 +169,6 @@
       color: var(--accent-text);
     }
 
-    /* Модальное окно просмотра PDF */
-    .pdf-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: var(--bg-color);
-      z-index: 2000;
-      display: flex;
-      flex-direction: column;
-      transform: translateY(100%);
-      transition: transform 0.3s ease;
-    }
-
-    .pdf-modal.active {
-      transform: translateY(0);
-    }
-
-    .pdf-header {
-      padding: 12px 16px;
-      background: var(--card-bg);
-      border-bottom: 1px solid var(--border-color);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .back-btn {
-      background: var(--badge-bg);
-      border: none;
-      color: var(--text-main);
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      font-size: 0.85rem;
-    }
-
-    .pdf-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #525659;
-    }
-
     .nav-tabs {
       display: flex;
       gap: 6px;
@@ -375,6 +329,17 @@
       border: 1px solid var(--border-color);
     }
 
+    .back-btn {
+      background: var(--badge-bg);
+      border: none;
+      color: var(--text-main);
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+
     .empty-state {
       text-align: center;
       padding: 40px 10px;
@@ -414,15 +379,6 @@
       <button class="modal-btn save" onclick="saveCityAndLoad()">Сохранить</button>
     </div>
   </div>
-</div>
-
-<!-- Модальное окно просмотра PDF -->
-<div class="pdf-modal" id="pdfModal">
-  <div class="pdf-header">
-    <button class="back-btn" onclick="closePdfViewer()">✕ Назад</button>
-    <span id="pdfTitle" style="font-weight: 600; font-size: 0.9rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">Документ</span>
-  </div>
-  <iframe id="pdfFrame" class="pdf-iframe" src=""></iframe>
 </div>
 
 <div class="app-wrapper">
@@ -541,14 +497,11 @@
   }
 
   function openPdf(title, url) {
-    document.getElementById('pdfTitle').innerText = title;
-    document.getElementById('pdfFrame').src = url;
-    document.getElementById('pdfModal').classList.add('active');
-  }
-
-  function closePdfViewer() {
-    document.getElementById('pdfModal').classList.remove('active');
-    document.getElementById('pdfFrame').src = '';
+    if (tg && tg.openLink) {
+      tg.openLink(url);
+    } else {
+      window.open(url, '_blank');
+    }
   }
 
   const SCHEDULE = {
