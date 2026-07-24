@@ -18,6 +18,8 @@
       --border-color: rgba(0, 0, 0, 0.08);
       --badge-bg: #f1f3f5;
       --overlay-bg: rgba(0, 0, 0, 0.5);
+      --highlight-border: #0066cc;
+      --highlight-bg: rgba(0, 102, 204, 0.03);
     }
 
     [data-theme="dark"] {
@@ -30,6 +32,8 @@
       --border-color: rgba(255, 255, 255, 0.08);
       --badge-bg: #222428;
       --overlay-bg: rgba(0, 0, 0, 0.7);
+      --highlight-border: #3388ff;
+      --highlight-bg: rgba(51, 136, 255, 0.06);
     }
 
     * {
@@ -77,6 +81,18 @@
       border: 1px solid var(--border-color);
     }
 
+    .status-info-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .live-lesson-badge {
+      font-size: 0.75rem;
+      color: var(--accent);
+      font-weight: 500;
+    }
+
     .weather-widget {
       font-size: 0.8rem;
       font-weight: 500;
@@ -88,6 +104,7 @@
       background: var(--badge-bg);
       padding: 5px 10px;
       border-radius: 10px;
+      white-space: nowrap;
     }
 
     /* Модальное окно выбора города */
@@ -231,6 +248,13 @@
       background: var(--card-bg);
       color: var(--text-main);
       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+      transition: all 0.2s ease;
+    }
+
+    /* Подсветка текущей пары */
+    .card.current-active {
+      border: 2px solid var(--highlight-border);
+      background: var(--highlight-bg);
     }
 
     .card-header {
@@ -384,7 +408,10 @@
 <div class="app-wrapper">
   <div class="container">
     <div class="status-bar">
-      <span id="weekStatusText">Загрузка...</span>
+      <div class="status-info-left">
+        <span id="weekStatusText">Загрузка...</span>
+        <span class="live-lesson-badge" id="liveLessonBadge">Идет пара...</span>
+      </div>
       <span class="weather-widget" id="weatherWidget" onclick="openCityModal()">🌤 Загрузка...</span>
     </div>
 
@@ -574,30 +601,39 @@
     return (weekNumber % 2 !== 0) ? 1 : 2;
   }
 
+  const LESSON_TIMES = {
+    '1': { start: '09:00', end: '10:45' },
+    '2': { start: '10:55', end: '12:40' },
+    '3': { start: '13:10', end: '14:55' },
+    '4': { start: '15:05', end: '16:50' },
+    '5': { start: '17:00', end: '18:45' }
+  };
+
   function getTime(paraNum) {
-    const times = {
-      '1': '09:00 - 10:45',
-      '2': '10:55 - 12:40',
-      '3': '13:10 - 14:55',
-      '4': '15:05 - 16:50',
-      '5': '17:00 - 18:45'
-    };
-    return times[paraNum] || 'Время неизвестно';
+    const t = LESSON_TIMES[paraNum];
+    return t ? `${t.start} - ${t.end}` : 'Время неизвестно';
+  }
+
+  function timeToMins(timeStr) {
+    const [h, m] = timeStr.split(':').map(Number);
+    return h * 60 + m;
   }
 
   let currentMode = 'current';
   let selectedDay = 'Понедельник';
   let selectedUmkdSubject = null;
+  let realTodayName = 'Понедельник';
 
   function detectToday() {
     const dayIndex = new Date().getDay();
     switch (dayIndex) {
-      case 1: selectedDay = 'Понедельник'; break;
-      case 2: selectedDay = 'Вторник'; break;
-      case 3: selectedDay = 'Среда'; break;
-      case 4: selectedDay = 'ЧТ'; break;
-      default: selectedDay = 'Понедельник'; break;
+      case 1: realTodayName = 'Понедельник'; break;
+      case 2: realTodayName = 'Вторник'; break;
+      case 3: realTodayName = 'Среда'; break;
+      case 4: realTodayName = 'ЧТ'; break;
+      default: realTodayName = 'Понедельник'; break;
     }
+    selectedDay = realTodayName;
   }
 
   function getShortDayName(fullDay) {
@@ -610,10 +646,11 @@
     return shortNames[fullDay] || 'ПН';
   }
 
-  function updateStatusBar() {
+  function updateStatusBarAndLive() {
     const currentWeekType = getWeekType();
     const currentWeekName = currentWeekType === 1 ? "Числитель ⚡" : "Знаменатель 🌙";
     const statusText = document.getElementById('weekStatusText');
+    const badgeEl = document.getElementById('liveLessonBadge');
 
     if (currentMode === 'current') {
       statusText.innerHTML = `Текущая: <b>${currentWeekName}</b>`;
@@ -624,6 +661,51 @@
       statusText.innerHTML = `📌 <b>Экзамены</b>`;
     } else {
       statusText.innerHTML = `📂 <b>УМКД Дисциплины</b>`;
+    }
+
+    // Расчет живого статуса пары
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    const dayIndex = now.getDay();
+    const isWeekend = (dayIndex === 0 || dayIndex === 6);
+
+    if (isWeekend) {
+      badgeEl.innerHTML = '🌴 Выходной день';
+      return;
+    }
+
+    const dayLessons = SCHEDULE[realTodayName] || [];
+    const targetWeek = currentWeekType;
+    const activeLessons = dayLessons.filter(l => l.type === 0 || l.type === targetWeek);
+
+    let currentParaNum = null;
+    let nextParaInfo = null;
+
+    for (const item of activeLessons) {
+      const t = LESSON_TIMES[item.пара];
+      if (!t) continue;
+      const startMins = timeToMins(t.start);
+      const endMins = timeToMins(t.end);
+
+      if (currentMins >= startMins && currentMins <= endMins) {
+        currentParaNum = item.пара;
+        break;
+      } else if (currentMins < startMins) {
+        if (!nextParaInfo) {
+          nextParaInfo = { num: item.пара, start: t.start };
+        }
+      }
+    }
+
+    if (currentParaNum) {
+      const t = LESSON_TIMES[currentParaNum];
+      const endMins = timeToMins(t.end);
+      const leftMins = endMins - currentMins;
+      badgeEl.innerHTML = `🔥 Идет пара №${currentParaNum} (еще ${leftMins} мин)`;
+    } else if (nextParaInfo) {
+      badgeEl.innerHTML = `⏳ Следующая: пара №${nextParaInfo.num} в ${nextParaInfo.start}`;
+    } else {
+      badgeEl.innerHTML = `🎉 Пары на сегодня всё`;
     }
   }
 
@@ -645,7 +727,7 @@
       daysGrid.style.display = 'grid';
       renderSchedule();
     }
-    updateStatusBar();
+    updateStatusBarAndLive();
   }
 
   function selectDay(dayName, btnElement) {
@@ -674,6 +756,20 @@
       return;
     }
 
+    // Проверяем, идет ли пара прямо сейчас (если выбран реальный сегодняшний день и текущая вкладка)
+    const now = new Date();
+    const currentMins = now.getHours() * 60 + now.getMinutes();
+    let activeParaNow = null;
+    if (currentMode === 'current' && selectedDay === realTodayName) {
+      for (const item of filteredLessons) {
+        const t = LESSON_TIMES[item.пара];
+        if (t && currentMins >= timeToMins(t.start) && currentMins <= timeToMins(t.end)) {
+          activeParaNow = item.пара;
+          break;
+        }
+      }
+    }
+
     let html = '';
     filteredLessons.forEach(item => {
       let typeBadge = '';
@@ -681,10 +777,12 @@
       else if (item.type === 2) typeBadge = '<span class="badge-type type-2">Знаменатель</span>';
       else typeBadge = '<span class="badge-type type-0">Каждую неделю</span>';
 
+      const isActive = (item.пара === activeParaNow) ? 'current-active' : '';
+
       html += `
-        <div class="card">
+        <div class="card ${isActive}">
           <div class="card-header">
-            <span class="para-num">Пара №${item.пара}</span>
+            <span class="para-num">Пара №${item.пара} ${isActive ? '⚡ (Идет сейчас)' : ''}</span>
             <span class="time-badge">🕐 ${getTime(item.пара)}</span>
           </div>
           <div class="subject-title">${item.sub}</div>
@@ -763,9 +861,17 @@
 
   document.addEventListener('DOMContentLoaded', () => {
     detectToday();
-    updateStatusBar();
+    updateStatusBarAndLive();
     selectDay(selectedDay, null);
     loadWeather();
+
+    // Обновляем статус времени и таймер каждую минуту
+    setInterval(() => {
+      updateStatusBarAndLive();
+      if (currentMode === 'current') {
+        renderSchedule();
+      }
+    }, 60000);
   });
 </script>
 </body>
