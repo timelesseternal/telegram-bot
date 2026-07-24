@@ -90,7 +90,7 @@
       border-radius: 10px;
     }
 
-    /* Модальное окно для ввода города */
+    /* Модальное окно выбора города */
     .modal-overlay {
       position: fixed;
       top: 0;
@@ -126,13 +126,13 @@
     .modal-title {
       font-size: 1rem;
       font-weight: 700;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       color: var(--text-main);
     }
 
-    .modal-input {
+    .modal-select {
       width: 100%;
-      padding: 10px 12px;
+      padding: 11px 12px;
       border: 1px solid var(--border-color);
       background: var(--bg-color);
       color: var(--text-main);
@@ -140,6 +140,7 @@
       font-size: 0.95rem;
       outline: none;
       margin-bottom: 14px;
+      cursor: pointer;
     }
 
     .modal-btn {
@@ -288,11 +289,31 @@
 </head>
 <body>
 
-<!-- Модальное окно для ввода города -->
+<!-- Модальное окно выбора города из списка -->
 <div class="modal-overlay" id="cityModal">
   <div class="modal-card">
-    <div class="modal-title">Введите ваш город</div>
-    <input type="text" id="cityInput" class="modal-input" placeholder="Например: Павлодар" value="Павлодар">
+    <div class="modal-title">Выберите ваш город</div>
+    <select id="citySelect" class="modal-select">
+      <option value="Павлодар">Павлодар</option>
+      <option value="Астана">Астана</option>
+      <option value="Алматы">Алматы</option>
+      <option value="Шымкент">Шымкент</option>
+      <option value="Караганда">Караганда</option>
+      <option value="Актобе">Актобе</option>
+      <option value="Костанай">Костанай</option>
+      <option value="Усть-Каменогорск">Усть-Каменогорск</option>
+      <option value="Семей">Семей</option>
+      <option value="Атырау">Атырау</option>
+      <option value="Павлодар">Павлодар</option>
+      <option value="Кызылорда">Кызылорда</option>
+      <option value="Тараз">Тараз</option>
+      <option value="Петропавловск">Петропавловск</option>
+      <option value="Уральск">Уральск</option>
+      <option value="Кокшетау">Кокшетау</option>
+      <option value="Туркестан">Туркестан</option>
+      <option value="Актау">Актау</option>
+      <option value="Экибастуз">Экибастуз</option>
+    </select>
     <button class="modal-btn" onclick="saveCityAndLoad()">Сохранить</button>
   </div>
 </div>
@@ -390,14 +411,15 @@
 
   function openCityModal() {
     const modal = document.getElementById('cityModal');
-    const input = document.getElementById('cityInput');
-    input.value = localStorage.getItem('user_city') || 'Павлодар';
+    const select = document.getElementById('citySelect');
+    const currentCity = localStorage.getItem('user_city') || 'Павлодар';
+    select.value = currentCity;
     modal.classList.add('active');
   }
 
   function saveCityAndLoad() {
-    const input = document.getElementById('cityInput');
-    const cityName = input.value.trim();
+    const select = document.getElementById('citySelect');
+    const cityName = select.value;
     if (cityName) {
       localStorage.setItem('user_city', cityName);
       document.getElementById('cityModal').classList.remove('active');
