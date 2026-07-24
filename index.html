@@ -325,6 +325,27 @@
     .type-2 { background: transparent; color: #9333ea; border: 1px solid #9333ea; }
     .type-0 { background: transparent; color: #16a34a; border: 1px solid #16a34a; }
 
+    .umkd-subject-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      transition: border-color 0.2s;
+    }
+
+    .umkd-subject-card:hover {
+      border-color: var(--accent);
+    }
+
     .umkd-item {
       display: flex;
       align-items: center;
@@ -378,7 +399,7 @@
   </div>
 </div>
 
-<!-- Модальное окно для просмотра PDF -->
+<!-- Модальное окно просмотра PDF -->
 <div class="pdf-modal" id="pdfModal">
   <div class="pdf-header">
     <button class="back-btn" onclick="closePdfViewer()">✕ Назад</button>
@@ -542,7 +563,6 @@
     { date: '21 мая (ЧТ)', time: '09:00', sub: 'Теория вероятностей и математическая статистика', teacher: 'Бекмагамбетова Э. К.', room: 'Корпус №1, 312' }
   ];
 
-  // Точный список УМКД по твоим дисциплинам со скриншота
   const UMKD_FILES = {
     'Введение в базы данных': [
       { name: '📄 Лекционный материал', url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf' },
@@ -595,6 +615,7 @@
 
   let currentMode = 'current';
   let selectedDay = 'Понедельник';
+  let selectedUmkdSubject = null;
 
   function detectToday() {
     const dayIndex = new Date().getDay();
@@ -636,6 +657,7 @@
 
   function switchWeek(mode) {
     currentMode = mode;
+    selectedUmkdSubject = null; // сбрасываем выбор при смене вкладки
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     if (mode === 'current') document.getElementById('tabCurrent').classList.add('active');
     if (mode === 'next') document.getElementById('tabNext').classList.add('active');
@@ -646,7 +668,7 @@
     if (mode === 'exams' || mode === 'umkd') {
       daysGrid.style.display = 'none';
       if (mode === 'exams') renderExams();
-      if (mode === 'umkd') renderUmkd();
+      if (mode === 'umkd') renderUmkdSubjects();
     } else {
       daysGrid.style.display = 'grid';
       renderSchedule();
@@ -726,31 +748,45 @@
     container.innerHTML = html;
   }
 
-  function renderUmkd() {
+  function renderUmkdSubjects() {
     const container = document.getElementById('scheduleContainer');
     let html = '';
 
-    for (const [subject, files] of Object.entries(UMKD_FILES)) {
-      let filesHtml = '';
-      files.forEach(file => {
-        filesHtml += `
-          <div class="umkd-item" onclick="openPdf('${file.name}', '${file.url}')">
-            <span>${file.name}</span>
-            <span>📂 Открыть</span>
-          </div>
-        `;
-      });
-
+    for (const subject of Object.keys(UMKD_FILES)) {
       html += `
-        <div class="card">
-          <div class="subject-title" style="font-size: 0.95rem; margin-bottom: 4px;">📚 ${subject}</div>
-          <div style="margin-top: 8px;">
-            ${filesHtml}
-          </div>
+        <div class="umkd-subject-card" onclick="selectUmkdSubject('${subject.replace(/'/g, "\\'")}')">
+          <span>📚 ${subject}</span>
+          <span style="color: var(--text-muted); font-weight: normal; font-size: 0.85rem;">Открыть ➔</span>
         </div>
       `;
     }
     container.innerHTML = html;
+  }
+
+  function selectUmkdSubject(subjectName) {
+    selectedUmkdSubject = subjectName;
+    const container = document.getElementById('scheduleContainer');
+    const files = UMKD_FILES[subjectName] || [];
+
+    let filesHtml = '';
+    files.forEach(file => {
+      filesHtml += `
+        <div class="umkd-item" onclick="openPdf('${file.name}', '${file.url}')">
+          <span>${file.name}</span>
+          <span>📂 Открыть PDF</span>
+        </div>
+      `;
+    });
+
+    container.innerHTML = `
+      <button class="back-btn" style="margin-bottom: 12px; padding: 8px 14px;" onclick="renderUmkdSubjects()">← Назад к списку дисциплин</button>
+      <div class="card">
+        <div class="subject-title" style="font-size: 1.05rem; margin-bottom: 10px;">📚 ${subjectName}</div>
+        <div style="margin-top: 8px;">
+          ${filesHtml}
+        </div>
+      </div>
+    `;
   }
 
   document.addEventListener('DOMContentLoaded', () => {
