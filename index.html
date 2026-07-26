@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Univer</title>
+  <meta name="description" content="Расписание пар, экзаменов и материалов УМКД">
+  <meta name="color-scheme" content="light dark">
 
   <!-- PWA настройки и иконки -->
   <meta name="theme-color" content="#0066cc">
@@ -17,7 +19,6 @@
   <style>
     :root {
       --bg-color: #f2f4f7;
-      --card-bg: #ffffff;
       --text-main: #1a1a1a;
       --text-muted: #555555;
       --accent: #0066cc;
@@ -28,6 +29,8 @@
       --highlight-border: #0066cc;
       --highlight-bg: rgba(0, 102, 204, 0.05);
       --progress-bg: rgba(0, 102, 204, 0.12);
+      --accent-tint-strong: rgba(0, 102, 204, 0.16);
+      --accent-tint-soft: rgba(0, 102, 204, 0.04);
 
       /* Liquid-glass tokens */
       --glass-bg: rgba(255, 255, 255, 0.5);
@@ -47,7 +50,6 @@
 
     [data-theme="dark"] {
       --bg-color: #0b0c0e;
-      --card-bg: #18191c;
       --text-main: #f1f3f5;
       --text-muted: #9ba1a6;
       --accent: #3388ff;
@@ -58,6 +60,8 @@
       --highlight-border: #3388ff;
       --highlight-bg: rgba(51, 136, 255, 0.08);
       --progress-bg: rgba(51, 136, 255, 0.18);
+      --accent-tint-strong: rgba(51, 136, 255, 0.22);
+      --accent-tint-soft: rgba(51, 136, 255, 0.06);
 
       --glass-bg: rgba(30, 32, 36, 0.55);
       --glass-bg-strong: rgba(30, 32, 36, 0.72);
@@ -400,7 +404,7 @@
     }
 
     .day-btn.umkd-btn {
-      background: linear-gradient(160deg, rgba(0, 102, 204, 0.16), rgba(0, 102, 204, 0.04)), var(--glass-bg);
+      background: linear-gradient(160deg, var(--accent-tint-strong), var(--accent-tint-soft)), var(--glass-bg);
       color: var(--accent);
       font-size: 0.78rem;
       letter-spacing: 0.2px;
@@ -595,7 +599,7 @@
     .back-btn:active { transform: scale(0.94); }
 
     .back-btn.accent-back {
-      background: linear-gradient(160deg, rgba(0, 102, 204, 0.16), rgba(0, 102, 204, 0.04)), var(--glass-bg);
+      background: linear-gradient(160deg, var(--accent-tint-strong), var(--accent-tint-soft)), var(--glass-bg);
       color: var(--accent);
       font-weight: 700;
       border-color: var(--glass-border);
@@ -740,8 +744,8 @@
         <span class="live-lesson-badge" id="liveLessonBadge">Идет пара...</span>
       </div>
       <div class="header-right-block">
-        <button class="today-btn" id="todayBtn" onclick="jumpToToday()">↩ Сегодня</button>
-        <span class="weather-widget" id="weatherWidget" onclick="openCityModal()">🌤 Загрузка...</span>
+        <button class="today-btn" id="todayBtn" onclick="jumpToToday()" aria-label="Перейти к сегодняшнему дню">↩ Сегодня</button>
+        <span class="weather-widget" id="weatherWidget" onclick="openCityModal()" role="button" aria-label="Выбрать город для погоды">🌤 Загрузка...</span>
       </div>
     </div>
 
