@@ -354,8 +354,8 @@
     .days-grid {
       position: relative;
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 4px;
       margin-bottom: 14px;
     }
 
@@ -589,6 +589,82 @@
       font-size: 0.95rem;
     }
 
+    .day-off-card {
+      text-align: center;
+      padding: 24px 18px;
+    }
+
+    .day-off-emoji {
+      font-size: 2.5rem;
+      margin-bottom: 6px;
+      line-height: 1;
+    }
+
+    .day-off-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: var(--text-main);
+    }
+
+    .day-off-weather {
+      min-height: 48px;
+    }
+
+    .day-off-weather-loading {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .day-off-weather-main {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .day-off-weather-emoji {
+      font-size: 1.6rem;
+    }
+
+    .day-off-weather-temp {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .day-off-weather-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+
+    .day-off-weather-details {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px 14px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .day-off-divider {
+      height: 1px;
+      background: var(--border-color);
+      margin: 18px 0;
+    }
+
+    .day-off-hint {
+      font-size: 0.9rem;
+      color: var(--text-main);
+      background: var(--badge-bg);
+      border-radius: 12px;
+      padding: 10px 12px;
+      text-align: left;
+      line-height: 1.4;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
         animation-duration: 0.001ms !important;
@@ -660,6 +736,9 @@
       <button class="day-btn" id="btn-ВТ" onclick="selectDay('Вторник', this)">ВТ</button>
       <button class="day-btn" id="btn-СР" onclick="selectDay('Среда', this)">СР</button>
       <button class="day-btn" id="btn-ЧТ" onclick="selectDay('Четверг', this)">ЧТ</button>
+      <button class="day-btn" id="btn-ПТ" onclick="selectDay('Пятница', this)">ПТ</button>
+      <button class="day-btn" id="btn-СБ" onclick="selectDay('Суббота', this)">СБ</button>
+      <button class="day-btn" id="btn-ВС" onclick="selectDay('Воскресенье', this)">ВС</button>
     </div>
 
     <div id="scheduleContainer"></div>
@@ -783,6 +862,91 @@
     return '🌤';
   }
 
+  function weatherDescription(code) {
+    const map = {
+      0: 'Ясно', 1: 'Малооблачно', 2: 'Облачно с прояснениями', 3: 'Пасмурно',
+      45: 'Туман', 48: 'Изморозь',
+      51: 'Морось', 53: 'Морось', 55: 'Морось',
+      61: 'Дождь', 63: 'Дождь', 65: 'Сильный дождь',
+      71: 'Снег', 73: 'Снег', 75: 'Сильный снегопад',
+      80: 'Ливень', 81: 'Ливень', 82: 'Сильный ливень',
+      95: 'Гроза'
+    };
+    return map[code] || 'Погода';
+  }
+
+  // Detailed forecast used only on the "no classes today" screen — separate
+  // from the small header widget's simple fetch, and cached for a few
+  // minutes so flipping tabs doesn't hammer the API.
+  async function fetchDayWeatherDetails(location, timeoutMs = 8000) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,apparent_temperature,relative_humidity_2m,wind_speed_10m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
+      const response = await fetch(url, { signal: controller.signal });
+      if (!response.ok) throw new Error('bad status ' + response.status);
+      return await response.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
+  let dayOffWeatherCache = { city: null, data: null, timestamp: 0 };
+
+  function renderDayOffWeatherHtml(data) {
+    const target = document.getElementById('dayOffWeatherDetail');
+    if (!target) return; // user already navigated away
+    const cur = data.current;
+    const emoji = weatherEmoji(cur.weather_code);
+    const desc = weatherDescription(cur.weather_code);
+    const temp = Math.round(cur.temperature_2m);
+    const feels = Math.round(cur.apparent_temperature);
+    const humidity = Math.round(cur.relative_humidity_2m);
+    const wind = Math.round(cur.wind_speed_10m);
+    const hasDaily = data.daily && data.daily.temperature_2m_max && data.daily.temperature_2m_min;
+    const tMax = hasDaily ? Math.round(data.daily.temperature_2m_max[0]) : null;
+    const tMin = hasDaily ? Math.round(data.daily.temperature_2m_min[0]) : null;
+    const rangeHtml = (tMax !== null && tMin !== null)
+      ? `<span>${tMin > 0 ? '+' + tMin : tMin}° / ${tMax > 0 ? '+' + tMax : tMax}°</span>`
+      : '';
+    target.innerHTML = `
+      <div class="day-off-weather-main">
+        <span class="day-off-weather-emoji">${emoji}</span>
+        <span class="day-off-weather-temp">${temp > 0 ? '+' + temp : temp}°C</span>
+        <span class="day-off-weather-desc">${desc}</span>
+      </div>
+      <div class="day-off-weather-details">
+        <span>Ощущается как ${feels > 0 ? '+' + feels : feels}°</span>
+        ${rangeHtml}
+        <span>💧 ${humidity}%</span>
+        <span>💨 ${wind} км/ч</span>
+      </div>
+    `;
+  }
+
+  async function fillDayOffWeather() {
+    const el = document.getElementById('dayOffWeatherDetail');
+    if (!el) return;
+    let savedCity = localStorage.getItem('user_city');
+    if (!savedCity || !CITY_COORDS[savedCity]) savedCity = 'Павлодар';
+
+    const cacheFresh = dayOffWeatherCache.city === savedCity
+      && (Date.now() - dayOffWeatherCache.timestamp) < 5 * 60 * 1000;
+    if (cacheFresh) {
+      renderDayOffWeatherHtml(dayOffWeatherCache.data);
+      return;
+    }
+
+    try {
+      const data = await fetchDayWeatherDetails(CITY_COORDS[savedCity]);
+      dayOffWeatherCache = { city: savedCity, data, timestamp: Date.now() };
+      renderDayOffWeatherHtml(data);
+    } catch (e) {
+      const stillThere = document.getElementById('dayOffWeatherDetail');
+      if (stillThere) stillThere.innerHTML = '🌡 Не удалось загрузить погоду';
+    }
+  }
+
   async function loadWeather(isRetry) {
     const weatherEl = document.getElementById('weatherWidget');
     let savedCity = localStorage.getItem('user_city');
@@ -869,9 +1033,12 @@
   // ---- Smooth content transition helper ----
   // animate=false is used for the once-a-second live refresh (progress bar / timer),
   // so the schedule only fades when the user actually switches tab/day.
-  function swapContent(container, html, animate = true) {
+  // onInserted (optional) fires right after the html lands in the DOM — used
+  // to kick off the day-off weather fetch only once the target element exists.
+  function swapContent(container, html, animate = true, onInserted) {
     if (!animate) {
       container.innerHTML = html;
+      if (onInserted) onInserted();
       return;
     }
     container.classList.add('content-hidden');
@@ -880,6 +1047,7 @@
       requestAnimationFrame(() => {
         container.classList.remove('content-hidden');
       });
+      if (onInserted) onInserted();
     }, 160);
   }
 
@@ -1016,11 +1184,55 @@
   }
 
   // A day "has classes" if it's a key in SCHEDULE with at least one entry.
-  // Centralizing this fixes the old bug where Friday/Saturday/Sunday were
-  // only special-cased as "weekend" by getDay(), while Friday actually has
-  // no lessons in SCHEDULE either and was silently treated like Monday.
+  // Fri/Sat/Sun aren't keys in SCHEDULE at all, so they naturally fall back
+  // to the "day off" screen just like any weekday with an empty list would.
   function dayHasClasses(dayName) {
     return Array.isArray(SCHEDULE[dayName]) && SCHEDULE[dayName].length > 0;
+  }
+
+  // Finds the date of the coming Monday (tomorrow if today is Sunday).
+  function getNextMondayDate() {
+    const d = new Date();
+    const day = d.getDay(); // 0 = Sunday ... 6 = Saturday
+    let diff = (8 - day) % 7;
+    if (diff === 0) diff = 7;
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
+
+  // Builds the "coming up" hint shown on the day-off screen: the first
+  // lesson of the next Monday, worked out from that Monday's actual
+  // числитель/знаменатель type rather than assuming it matches today's.
+  function getUpcomingMondayHint() {
+    const mondayDate = getNextMondayDate();
+    const weekType = getWeekType(mondayDate);
+    const lessons = (SCHEDULE['Понедельник'] || [])
+      .filter(l => l.type === 0 || l.type === weekType)
+      .slice()
+      .sort((a, b) => parseInt(a.пара, 10) - parseInt(b.пара, 10));
+
+    if (lessons.length === 0) {
+      return 'На понедельник пар пока нет — можно отдыхать подольше 😌';
+    }
+    const first = lessons[0];
+    const t = LESSON_TIMES[first.пара];
+    const timeStr = t ? t.start : '?';
+    return `Ближайшая пара — <strong>${first.sub}</strong>, ПН в ${timeStr}, каб. ${first.room}`;
+  }
+
+  function buildDayOffScreen() {
+    const hint = getUpcomingMondayHint();
+    return `
+      <div class="card day-off-card">
+        <div class="day-off-emoji">🎉</div>
+        <div class="day-off-title">Сегодня без пар</div>
+        <div class="day-off-weather" id="dayOffWeatherDetail">
+          <span class="day-off-weather-loading">🌤 Погода загружается...</span>
+        </div>
+        <div class="day-off-divider"></div>
+        <div class="day-off-hint">📌 ${hint}</div>
+      </div>
+    `;
   }
 
   let currentMode = 'current';
@@ -1032,10 +1244,9 @@
 
   function detectToday() {
     realTodayName = DAY_NAMES_BY_INDEX[new Date().getDay()];
-    // Only Mon–Thu have their own tab; on days without a tab we still track
-    // the real day for the live status badge, but show Monday's tab as the
-    // default selected view so something sensible is always on screen.
-    selectedDay = dayHasClasses(realTodayName) ? realTodayName : 'Понедельник';
+    // All 7 days now have their own button, so the initially selected day
+    // is simply whatever day it really is today.
+    selectedDay = realTodayName;
 
     const shortName = getShortDayName(realTodayName);
     if (shortName) {
@@ -1049,7 +1260,10 @@
       'Понедельник': 'ПН',
       'Вторник': 'ВТ',
       'Среда': 'СР',
-      'Четверг': 'ЧТ'
+      'Четверг': 'ЧТ',
+      'Пятница': 'ПТ',
+      'Суббота': 'СБ',
+      'Воскресенье': 'ВС'
     };
     return shortNames[fullDay] || null;
   }
@@ -1126,11 +1340,7 @@
   function jumpToToday() {
     haptic('light');
     switchWeek('current');
-    if (dayHasClasses(realTodayName)) {
-      selectDay(realTodayName, null);
-    } else {
-      selectDay('Понедельник', null);
-    }
+    selectDay(realTodayName, null);
   }
 
   function switchWeek(mode) {
@@ -1182,7 +1392,11 @@
     const filteredLessons = dayLessons.filter(l => l.type === 0 || l.type === targetWeek);
 
     if (filteredLessons.length === 0) {
-      swapContent(container, '<div class="empty-state">🎉 На этот день пар нет!</div>', animate);
+      const isDayOff = !dayHasClasses(selectedDay);
+      const html = isDayOff
+        ? buildDayOffScreen()
+        : '<div class="empty-state">🎉 На этот день пар нет!</div>';
+      swapContent(container, html, animate, isDayOff ? fillDayOffWeather : null);
       return;
     }
 
@@ -1325,7 +1539,7 @@
 
     setInterval(() => {
       updateStatusBarAndLive();
-      if (currentMode === 'current') {
+      if (currentMode === 'current' && dayHasClasses(selectedDay)) {
         renderSchedule(false);
       }
     }, 1000);
