@@ -145,12 +145,26 @@
       display: flex;
       flex-direction: column;
       gap: 2px;
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
+    }
+
+    #weekStatusText {
+      display: block;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .live-lesson-badge {
+      display: block;
       font-size: 0.75rem;
       color: var(--accent);
       font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
       transition: opacity 0.25s ease;
     }
 
@@ -158,6 +172,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-shrink: 0;
     }
 
     .weather-widget {
@@ -180,17 +195,19 @@
     .weather-widget:active { transform: scale(0.94); }
 
     .today-btn {
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 600;
       color: var(--accent-text);
       background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
-      padding: 6px 10px;
+      padding: 6px 9px;
       border-radius: 12px;
       border: none;
       cursor: pointer;
       display: none;
       align-items: center;
-      gap: 3px;
+      gap: 2px;
+      white-space: nowrap;
+      flex-shrink: 0;
       box-shadow: 0 4px 14px rgba(0,102,204,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
       transition: transform 0.2s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
     }
@@ -624,7 +641,7 @@
         <span class="live-lesson-badge" id="liveLessonBadge">Идет пара...</span>
       </div>
       <div class="header-right-block">
-        <button class="today-btn" id="todayBtn" onclick="jumpToToday()">📅 Сегодня</button>
+        <button class="today-btn" id="todayBtn" onclick="jumpToToday()">↩ Сегодня</button>
         <span class="weather-widget" id="weatherWidget" onclick="openCityModal()">🌤 Загрузка...</span>
       </div>
     </div>
