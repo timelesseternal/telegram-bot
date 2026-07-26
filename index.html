@@ -984,6 +984,9 @@
 
     if (isWeekend) {
       badgeEl.innerHTML = '🌴 Выходной день';
+      if (currentMode === 'current') {
+        renderSchedule(false);
+      }
       return;
     }
 
@@ -1083,7 +1086,9 @@
     let activeParaNow = null;
     let progressPercent = 0;
 
-    if (currentMode === 'current' && selectedDay === realTodayName) {
+    const dayIndex = new Date().getDay();
+    const isWeekend = (dayIndex === 0 || dayIndex === 6);
+    if (currentMode === 'current' && selectedDay === realTodayName && !isWeekend) {
       for (const item of filteredLessons) {
         const t = LESSON_TIMES[item.пара];
         if (t) {
