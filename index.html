@@ -354,7 +354,7 @@
     .days-grid {
       position: relative;
       display: grid;
-      grid-template-columns: repeat(7, 1fr);
+      grid-template-columns: repeat(4, 1fr);
       gap: 4px;
       margin-bottom: 14px;
     }
@@ -395,6 +395,18 @@
 
     .day-btn.active {
       background: transparent !important;
+      color: var(--accent-text) !important;
+      border-color: transparent !important;
+    }
+
+    .day-btn.umkd-btn {
+      background: linear-gradient(160deg, rgba(0, 102, 204, 0.16), rgba(0, 102, 204, 0.04)), var(--glass-bg);
+      color: var(--accent);
+      font-size: 0.78rem;
+      letter-spacing: 0.2px;
+    }
+    .day-btn.umkd-btn.active {
+      background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent) !important;
       color: var(--accent-text) !important;
       border-color: transparent !important;
     }
@@ -582,6 +594,17 @@
     }
     .back-btn:active { transform: scale(0.94); }
 
+    .back-btn.accent-back {
+      background: linear-gradient(160deg, rgba(0, 102, 204, 0.16), rgba(0, 102, 204, 0.04)), var(--glass-bg);
+      color: var(--accent);
+      font-weight: 700;
+      border-color: var(--glass-border);
+    }
+    .back-btn.accent-back:active {
+      background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
+      color: var(--accent-text);
+    }
+
     .empty-state {
       text-align: center;
       padding: 40px 10px;
@@ -727,7 +750,6 @@
       <button class="tab-btn active" id="tabCurrent" onclick="switchWeek('current')">Текущая</button>
       <button class="tab-btn" id="tabNext" onclick="switchWeek('next')">Следующая</button>
       <button class="tab-btn" id="tabExams" onclick="switchWeek('exams')">Экзамены</button>
-      <button class="tab-btn" id="tabUmkd" onclick="switchWeek('umkd')">УМКД</button>
     </div>
 
     <div class="days-grid" id="daysGrid">
@@ -739,6 +761,7 @@
       <button class="day-btn" id="btn-ПТ" onclick="selectDay('Пятница', this)">ПТ</button>
       <button class="day-btn" id="btn-СБ" onclick="selectDay('Суббота', this)">СБ</button>
       <button class="day-btn" id="btn-ВС" onclick="selectDay('Воскресенье', this)">ВС</button>
+      <button class="day-btn umkd-btn" id="btn-УМКД" onclick="switchWeek('umkd')">📁 УМКД</button>
     </div>
 
     <div id="scheduleContainer"></div>
@@ -1351,8 +1374,20 @@
     if (mode === 'current') document.getElementById('tabCurrent').classList.add('active');
     if (mode === 'next') document.getElementById('tabNext').classList.add('active');
     if (mode === 'exams') document.getElementById('tabExams').classList.add('active');
-    if (mode === 'umkd') document.getElementById('tabUmkd').classList.add('active');
     updateTabIndicator();
+
+    // УМКД has no top tab of its own anymore — it's a button inside the
+    // days grid. Keep its highlight in sync without losing the currently
+    // selected day's highlight when switching between other tabs.
+    const umkdGridBtn = document.getElementById('btn-УМКД');
+    document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
+    if (mode === 'umkd') {
+      if (umkdGridBtn) umkdGridBtn.classList.add('active');
+    } else {
+      const shortName = getShortDayName(selectedDay);
+      const dayBtn = shortName ? document.getElementById(`btn-${shortName}`) : null;
+      if (dayBtn) dayBtn.classList.add('active');
+    }
 
     const daysGrid = document.getElementById('daysGrid');
     if (mode === 'exams' || mode === 'umkd') {
@@ -1484,7 +1519,7 @@
 
   function renderUmkdSubjects() {
     const container = document.getElementById('scheduleContainer');
-    let html = '';
+    let html = '<button class="back-btn accent-back" style="margin-bottom: 12px; padding: 8px 14px;" onclick="switchWeek(\'current\')">← Назад к расписанию</button>';
 
     for (const subject of Object.keys(UMKD_FILES)) {
       html += `
@@ -1514,7 +1549,7 @@
     });
 
     const html = `
-      <button class="back-btn" style="margin-bottom: 12px; padding: 8px 14px;" onclick="renderUmkdSubjects()">← Назад к списку дисциплин</button>
+      <button class="back-btn accent-back" style="margin-bottom: 12px; padding: 8px 14px;" onclick="renderUmkdSubjects()">← Назад к списку дисциплин</button>
       <div class="card">
         <div class="subject-title" style="font-size: 1.05rem; margin-bottom: 10px;">📚 ${subjectName}</div>
         <div style="margin-top: 8px;">
