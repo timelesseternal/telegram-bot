@@ -781,7 +781,8 @@
     <div class="modal-title">Акцентный цвет</div>
     <div class="accent-swatch-grid" id="accentSwatchGrid"></div>
     <div class="modal-buttons">
-      <button class="modal-btn cancel" onclick="closeAccentModal()">Закрыть</button>
+      <button class="modal-btn cancel" onclick="closeAccentModal()">Отменить</button>
+      <button class="modal-btn save" onclick="saveAccentTheme()">Сохранить</button>
     </div>
   </div>
 </div>
@@ -1092,6 +1093,7 @@
   ];
   const ACCENT_CSS_PROPS = ['--accent', '--accent-text', '--accent-rgb', '--highlight-border', '--highlight-bg', '--progress-bg', '--accent-tint-strong', '--accent-tint-soft'];
   let currentAccentId = 'default';
+  let pendingAccentId = 'default';
 
   function hexToRgbTriple(hex) {
     const clean = hex.replace('#', '');
@@ -1125,7 +1127,7 @@
     const grid = document.getElementById('accentSwatchGrid');
     if (!grid) return;
     grid.innerHTML = ACCENT_THEMES.map(t => `
-      <button class="accent-swatch${t.id === currentAccentId ? ' selected' : ''}" style="background:${t.hex}; color:${t.text};" onclick="chooseAccentTheme('${t.id}')">
+      <button class="accent-swatch${t.id === pendingAccentId ? ' selected' : ''}" style="background:${t.hex}; color:${t.text};" onclick="selectAccentSwatch('${t.id}')">
         <span class="accent-swatch-check">✓</span>
         <span class="accent-swatch-label">${t.name}</span>
         <span class="accent-swatch-hex">${t.hex}</span>
@@ -1133,14 +1135,21 @@
     `).join('');
   }
 
-  function chooseAccentTheme(id) {
-    haptic('medium');
-    applyAccentTheme(id);
+  function selectAccentSwatch(id) {
+    haptic('light');
+    pendingAccentId = id;
     renderAccentSwatches();
+  }
+
+  function saveAccentTheme() {
+    haptic('medium');
+    applyAccentTheme(pendingAccentId);
+    closeAccentModal();
   }
 
   function openAccentModal() {
     haptic('light');
+    pendingAccentId = currentAccentId;
     renderAccentSwatches();
     document.getElementById('accentModal').classList.add('active');
   }
