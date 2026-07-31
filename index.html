@@ -23,6 +23,7 @@
       --text-muted: #555555;
       --accent: #0066cc;
       --accent-text: #ffffff;
+      --accent-rgb: 0, 102, 204;
       --border-color: rgba(0, 0, 0, 0.08);
       --badge-bg: #f1f3f5;
       --overlay-bg: rgba(0, 0, 0, 0.35);
@@ -54,6 +55,7 @@
       --text-muted: #9ba1a6;
       --accent: #3388ff;
       --accent-text: #ffffff;
+      --accent-rgb: 51, 136, 255;
       --border-color: rgba(255, 255, 255, 0.08);
       --badge-bg: #222428;
       --overlay-bg: rgba(0, 0, 0, 0.55);
@@ -179,7 +181,7 @@
       flex-shrink: 0;
     }
 
-    .weather-widget {
+    .weather-widget, .theme-btn {
       font-size: 0.8rem;
       font-weight: 500;
       color: var(--text-muted);
@@ -196,7 +198,45 @@
       white-space: nowrap;
       transition: transform 0.2s cubic-bezier(0.4,0,0.2,1), background-color 0.3s ease;
     }
-    .weather-widget:active { transform: scale(0.94); }
+    .weather-widget:active, .theme-btn:active { transform: scale(0.94); }
+
+    .accent-swatch-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .accent-swatch {
+      position: relative;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 6px 10px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.72rem;
+      text-align: center;
+      transition: transform 0.2s cubic-bezier(0.4,0,0.2,1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    }
+    .accent-swatch:active { transform: scale(0.93); }
+    .accent-swatch-check {
+      display: block;
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+      opacity: 0;
+    }
+    .accent-swatch.selected .accent-swatch-check { opacity: 1; }
+    .accent-swatch-label {
+      display: block;
+      line-height: 1.2;
+    }
+    .accent-swatch-hex {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 500;
+      opacity: 0.7;
+      margin-top: 2px;
+    }
 
     .today-btn {
       font-size: 0.72rem;
@@ -212,7 +252,7 @@
       gap: 2px;
       white-space: nowrap;
       flex-shrink: 0;
-      box-shadow: 0 4px 14px rgba(0,102,204,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+      box-shadow: 0 4px 14px rgba(var(--accent-rgb), 0.35), inset 0 1px 0 rgba(255,255,255,0.35);
       transition: transform 0.2s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease;
     }
     .today-btn:active { transform: scale(0.92); }
@@ -322,7 +362,7 @@
       width: 0;
       border-radius: 14px;
       background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
-      box-shadow: 0 4px 16px rgba(0,102,204,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+      box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.35), inset 0 1px 0 rgba(255,255,255,0.35);
       transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), width 0.28s cubic-bezier(0.4,0,0.2,1);
       z-index: 0;
       pointer-events: none;
@@ -372,7 +412,7 @@
       opacity: 0;
       border-radius: 14px;
       background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
-      box-shadow: 0 4px 16px rgba(0,102,204,0.35), inset 0 1px 0 rgba(255,255,255,0.35);
+      box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.35), inset 0 1px 0 rgba(255,255,255,0.35);
       transition: transform 0.28s cubic-bezier(0.4,0,0.2,1), width 0.28s ease, height 0.28s ease, opacity 0.2s ease;
       z-index: 0;
       pointer-events: none;
@@ -736,6 +776,16 @@
   </div>
 </div>
 
+<div class="modal-overlay" id="accentModal">
+  <div class="modal-card">
+    <div class="modal-title">Акцентный цвет</div>
+    <div class="accent-swatch-grid" id="accentSwatchGrid"></div>
+    <div class="modal-buttons">
+      <button class="modal-btn cancel" onclick="closeAccentModal()">Закрыть</button>
+    </div>
+  </div>
+</div>
+
 <div class="app-wrapper">
   <div class="container">
     <div class="status-bar">
@@ -745,6 +795,7 @@
       </div>
       <div class="header-right-block">
         <button class="today-btn" id="todayBtn" onclick="jumpToToday()" aria-label="Перейти к сегодняшнему дню">↩ Сегодня</button>
+        <button class="theme-btn" id="themeBtn" onclick="openAccentModal()" aria-label="Выбрать акцентный цвет">🎨</button>
         <span class="weather-widget" id="weatherWidget" onclick="openCityModal()" role="button" aria-label="Выбрать город для погоды">🌤 Загрузка...</span>
       </div>
     </div>
@@ -1024,6 +1075,79 @@
       closeCityModal();
       loadWeather();
     }
+  }
+
+  // ---- Accent color theming ----
+  // Six curated color pairs, plus a 'default' entry that just resets to the
+  // built-in blue by removing the overrides (so light/dark keep their own
+  // slightly different default blue instead of being forced to one hex).
+  const ACCENT_THEMES = [
+    { id: 'default', name: 'Стандартный', hex: '#0066CC', text: '#FFFFFF' },
+    { id: 'lavender', name: 'Лаванда', hex: '#B8A7F0', text: '#232329' },
+    { id: 'mint', name: 'Мята', hex: '#B9E5C8', text: '#2B1A12' },
+    { id: 'butter', name: 'Масло', hex: '#F2D06B', text: '#1E2530' },
+    { id: 'olive', name: 'Олива', hex: '#4C511F', text: '#FFFFFF' },
+    { id: 'mocha', name: 'Мокко', hex: '#9C7A66', text: '#FFFFFF' },
+    { id: 'ultraviolet', name: 'Ультрафиолет', hex: '#5B3FA8', text: '#FFFFFF' }
+  ];
+  const ACCENT_CSS_PROPS = ['--accent', '--accent-text', '--accent-rgb', '--highlight-border', '--highlight-bg', '--progress-bg', '--accent-tint-strong', '--accent-tint-soft'];
+  let currentAccentId = 'default';
+
+  function hexToRgbTriple(hex) {
+    const clean = hex.replace('#', '');
+    const bigint = parseInt(clean, 16);
+    return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+  }
+
+  function applyAccentTheme(id, persist = true) {
+    const root = document.documentElement.style;
+    if (id === 'default') {
+      ACCENT_CSS_PROPS.forEach(prop => root.removeProperty(prop));
+    } else {
+      const theme = ACCENT_THEMES.find(t => t.id === id);
+      if (!theme) return;
+      const { r, g, b } = hexToRgbTriple(theme.hex);
+      const rgbStr = `${r}, ${g}, ${b}`;
+      root.setProperty('--accent', theme.hex);
+      root.setProperty('--accent-text', theme.text);
+      root.setProperty('--accent-rgb', rgbStr);
+      root.setProperty('--highlight-border', theme.hex);
+      root.setProperty('--highlight-bg', `rgba(${rgbStr}, 0.06)`);
+      root.setProperty('--progress-bg', `rgba(${rgbStr}, 0.14)`);
+      root.setProperty('--accent-tint-strong', `rgba(${rgbStr}, 0.18)`);
+      root.setProperty('--accent-tint-soft', `rgba(${rgbStr}, 0.05)`);
+    }
+    currentAccentId = id;
+    if (persist) localStorage.setItem('user_accent', id);
+  }
+
+  function renderAccentSwatches() {
+    const grid = document.getElementById('accentSwatchGrid');
+    if (!grid) return;
+    grid.innerHTML = ACCENT_THEMES.map(t => `
+      <button class="accent-swatch${t.id === currentAccentId ? ' selected' : ''}" style="background:${t.hex}; color:${t.text};" onclick="chooseAccentTheme('${t.id}')">
+        <span class="accent-swatch-check">✓</span>
+        <span class="accent-swatch-label">${t.name}</span>
+        <span class="accent-swatch-hex">${t.hex}</span>
+      </button>
+    `).join('');
+  }
+
+  function chooseAccentTheme(id) {
+    haptic('medium');
+    applyAccentTheme(id);
+    renderAccentSwatches();
+  }
+
+  function openAccentModal() {
+    haptic('light');
+    renderAccentSwatches();
+    document.getElementById('accentModal').classList.add('active');
+  }
+
+  function closeAccentModal() {
+    haptic('light');
+    document.getElementById('accentModal').classList.remove('active');
   }
 
   function openPdf(title, url) {
@@ -1552,6 +1676,8 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
+    const savedAccent = localStorage.getItem('user_accent') || 'default';
+    applyAccentTheme(savedAccent, false);
     applyTimeOfDayAmbient();
     detectToday();
     updateStatusBarAndLive();
