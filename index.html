@@ -238,6 +238,35 @@
       margin-top: 2px;
     }
 
+    .accent-default-btn {
+      width: 100%;
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 14px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--badge-bg);
+      color: var(--text-main);
+      transition: transform 0.2s cubic-bezier(0.4,0,0.2,1), background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+    }
+    .accent-default-btn:active { transform: scale(0.97); }
+    .accent-default-btn.selected {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+    .accent-default-check {
+      opacity: 0;
+      font-size: 0.9rem;
+    }
+    .accent-default-btn.selected .accent-default-check { opacity: 1; }
+
     .today-btn {
       font-size: 0.72rem;
       font-weight: 600;
@@ -780,6 +809,10 @@
   <div class="modal-card">
     <div class="modal-title">Акцентный цвет</div>
     <div class="accent-swatch-grid" id="accentSwatchGrid"></div>
+    <button class="accent-default-btn" id="accentDefaultBtn" onclick="selectAccentSwatch('default')">
+      <span class="accent-default-check">✓</span>
+      <span>По умолчанию</span>
+    </button>
     <div class="modal-buttons">
       <button class="modal-btn cancel" onclick="closeAccentModal()">Отменить</button>
       <button class="modal-btn save" onclick="saveAccentTheme()">Сохранить</button>
@@ -806,6 +839,7 @@
       <button class="tab-btn active" id="tabCurrent" onclick="switchWeek('current')">Текущая</button>
       <button class="tab-btn" id="tabNext" onclick="switchWeek('next')">Следующая</button>
       <button class="tab-btn" id="tabExams" onclick="switchWeek('exams')">Экзамены</button>
+      <button class="tab-btn" id="tabUmkd" onclick="switchWeek('umkd')">УМКД</button>
     </div>
 
     <div class="days-grid" id="daysGrid">
@@ -814,10 +848,6 @@
       <button class="day-btn" id="btn-ВТ" onclick="selectDay('Вторник', this)">ВТ</button>
       <button class="day-btn" id="btn-СР" onclick="selectDay('Среда', this)">СР</button>
       <button class="day-btn" id="btn-ЧТ" onclick="selectDay('Четверг', this)">ЧТ</button>
-      <button class="day-btn" id="btn-ПТ" onclick="selectDay('Пятница', this)">ПТ</button>
-      <button class="day-btn" id="btn-СБ" onclick="selectDay('Суббота', this)">СБ</button>
-      <button class="day-btn" id="btn-ВС" onclick="selectDay('Воскресенье', this)">ВС</button>
-      <button class="day-btn umkd-btn" id="btn-УМКД" onclick="switchWeek('umkd')">📁 УМКД</button>
     </div>
 
     <div id="scheduleContainer"></div>
@@ -1126,13 +1156,19 @@
   function renderAccentSwatches() {
     const grid = document.getElementById('accentSwatchGrid');
     if (!grid) return;
-    grid.innerHTML = ACCENT_THEMES.map(t => `
+    const colorThemes = ACCENT_THEMES.filter(t => t.id !== 'default');
+    grid.innerHTML = colorThemes.map(t => `
       <button class="accent-swatch${t.id === pendingAccentId ? ' selected' : ''}" style="background:${t.hex}; color:${t.text};" onclick="selectAccentSwatch('${t.id}')">
         <span class="accent-swatch-check">✓</span>
         <span class="accent-swatch-label">${t.name}</span>
         <span class="accent-swatch-hex">${t.hex}</span>
       </button>
     `).join('');
+
+    const defaultBtn = document.getElementById('accentDefaultBtn');
+    if (defaultBtn) {
+      defaultBtn.classList.toggle('selected', pendingAccentId === 'default');
+    }
   }
 
   function selectAccentSwatch(id) {
@@ -1344,28 +1380,41 @@
     return d;
   }
 
-  // Builds the "coming up" hint shown on the day-off screen: the first
-  // lesson of the next Monday, worked out from that Monday's actual
-  // числитель/знаменатель type rather than assuming it matches today's.
-  function getUpcomingMondayHint() {
-    const mondayDate = getNextMondayDate();
-    const weekType = getWeekType(mondayDate);
-    const lessons = (SCHEDULE['Понедельник'] || [])
-      .filter(l => l.type === 0 || l.type === weekType)
-      .slice()
-      .sort((a, b) => parseInt(a.пара, 10) - parseInt(b.пара, 10));
+  // Возвращает Date для "завтра" относительно текущего момента.
+  function getTomorrowDate() {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d;
+  }
 
-    if (lessons.length === 0) {
-      return 'На понедельник пар пока нет — можно отдыхать подольше 😌';
+  // Ищет вперёд по дням (начиная с baseDate включительно) ближайший день,
+  // где реально есть пары, каждый раз заново считая числитель/знаменатель
+  // для конкретной даты — поэтому корректно работает и при переходе в
+  // следующую неделю.
+  function getUpcomingHintFromDate(baseDate) {
+    for (let offset = 0; offset <= 8; offset++) {
+      const d = new Date(baseDate);
+      d.setDate(d.getDate() + offset);
+      const dayName = DAY_NAMES_BY_INDEX[d.getDay()];
+      const weekType = getWeekType(d);
+      const lessons = (SCHEDULE[dayName] || [])
+        .filter(l => l.type === 0 || l.type === weekType)
+        .slice()
+        .sort((a, b) => parseInt(a.пара, 10) - parseInt(b.пара, 10));
+
+      if (lessons.length > 0) {
+        const first = lessons[0];
+        const t = LESSON_TIMES[first.пара];
+        const timeStr = t ? t.start : '?';
+        const shortDay = getShortDayName(dayName) || dayName;
+        return `Ближайшая пара — <strong>${first.sub}</strong>, ${shortDay} в ${timeStr}, каб. ${first.room}`;
+      }
     }
-    const first = lessons[0];
-    const t = LESSON_TIMES[first.пара];
-    const timeStr = t ? t.start : '?';
-    return `Ближайшая пара — <strong>${first.sub}</strong>, ПН в ${timeStr}, каб. ${first.room}`;
+    return 'Ближайших пар пока не видно — можно отдыхать подольше 😌';
   }
 
   function buildDayOffScreen(dayName) {
-    const hint = getUpcomingMondayHint();
+    const hint = getUpcomingHintFromDate(getTomorrowDate());
     const isActuallyToday = dayName === realTodayName && currentMode === 'current';
     const title = isActuallyToday ? 'Сегодня без пар' : `${dayName}: пар нет`;
     return `
@@ -1379,6 +1428,38 @@
         <div class="day-off-hint">📌 ${hint}</div>
       </div>
     `;
+  }
+
+  // Экран, который показывается, когда все пары на сегодня закончились
+  // (плюс 30 минут буфера) — визуально как "выходной", но с другим текстом.
+  function buildDayFinishedScreen(dayName) {
+    const hint = getUpcomingHintFromDate(getTomorrowDate());
+    return `
+      <div class="card day-off-card">
+        <div class="day-off-emoji">✅</div>
+        <div class="day-off-title">${dayName}: пары закончились</div>
+        <div class="day-off-weather" id="dayOffWeatherDetail">
+          <span class="day-off-weather-loading">🌤 Погода загружается...</span>
+        </div>
+        <div class="day-off-divider"></div>
+        <div class="day-off-hint">📌 ${hint}</div>
+      </div>
+    `;
+  }
+
+  // Время окончания (в минутах от полуночи) последней пары дня для
+  // конкретного типа недели, или null, если пар в этот день нет.
+  function getDayLastLessonEndMins(dayName, weekType) {
+    const lessons = (SCHEDULE[dayName] || []).filter(l => l.type === 0 || l.type === weekType);
+    let maxEnd = null;
+    lessons.forEach(l => {
+      const t = LESSON_TIMES[l.пара];
+      if (t) {
+        const endMins = timeToMins(t.end);
+        if (maxEnd === null || endMins > maxEnd) maxEnd = endMins;
+      }
+    });
+    return maxEnd;
   }
 
   let currentMode = 'current';
@@ -1497,20 +1578,13 @@
     if (mode === 'current') document.getElementById('tabCurrent').classList.add('active');
     if (mode === 'next') document.getElementById('tabNext').classList.add('active');
     if (mode === 'exams') document.getElementById('tabExams').classList.add('active');
+    if (mode === 'umkd') document.getElementById('tabUmkd').classList.add('active');
     updateTabIndicator();
 
-    // УМКД has no top tab of its own anymore — it's a button inside the
-    // days grid. Keep its highlight in sync without losing the currently
-    // selected day's highlight when switching between other tabs.
-    const umkdGridBtn = document.getElementById('btn-УМКД');
     document.querySelectorAll('.day-btn').forEach(btn => btn.classList.remove('active'));
-    if (mode === 'umkd') {
-      if (umkdGridBtn) umkdGridBtn.classList.add('active');
-    } else {
-      const shortName = getShortDayName(selectedDay);
-      const dayBtn = shortName ? document.getElementById(`btn-${shortName}`) : null;
-      if (dayBtn) dayBtn.classList.add('active');
-    }
+    const shortName = getShortDayName(selectedDay);
+    const dayBtn = shortName ? document.getElementById(`btn-${shortName}`) : null;
+    if (dayBtn) dayBtn.classList.add('active');
 
     const daysGrid = document.getElementById('daysGrid');
     if (mode === 'exams' || mode === 'umkd') {
@@ -1548,6 +1622,20 @@
 
     const dayLessons = SCHEDULE[selectedDay] || [];
     const filteredLessons = dayLessons.filter(l => l.type === 0 || l.type === targetWeek);
+
+    // Как только все пары сегодняшнего дня закончились (+ 30 минут буфера),
+    // показываем экран "пары закончились" вместо уже неактуального списка.
+    const isViewingLiveToday = currentMode === 'current' && selectedDay === realTodayName;
+    if (isViewingLiveToday && filteredLessons.length > 0) {
+      const lastEndMins = getDayLastLessonEndMins(selectedDay, targetWeek);
+      const now = new Date();
+      const nowMins = now.getHours() * 60 + now.getMinutes();
+      if (lastEndMins !== null && nowMins > lastEndMins + 30) {
+        const html = buildDayFinishedScreen(selectedDay);
+        swapContent(container, html, animate, fillDayOffWeather);
+        return;
+      }
+    }
 
     if (filteredLessons.length === 0) {
       const html = buildDayOffScreen(selectedDay);
