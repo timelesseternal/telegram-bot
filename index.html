@@ -1623,17 +1623,16 @@
     const dayLessons = SCHEDULE[selectedDay] || [];
     const filteredLessons = dayLessons.filter(l => l.type === 0 || l.type === targetWeek);
 
-    // Как только все пары сегодняшнего дня закончились (+ 30 минут буфера),
-    // показываем экран "пары закончились" вместо уже неактуального списка.
     const isViewingLiveToday = currentMode === 'current' && selectedDay === realTodayName;
-    if (isViewingLiveToday && filteredLessons.length > 0) {
+    if (isViewingLiveToday && dayHasClasses(selectedDay)) {
       const lastEndMins = getDayLastLessonEndMins(selectedDay, targetWeek);
-      const now = new Date();
-      const nowMins = now.getHours() * 60 + now.getMinutes();
-      if (lastEndMins !== null && nowMins > lastEndMins + 30) {
-        const html = buildDayFinishedScreen(selectedDay);
-        swapContent(container, html, animate, fillDayOffWeather);
-        return;
+      if (lastEndMins !== null) {
+        const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+        if (nowMins > lastEndMins + 30) {
+          const html = buildDayFinishedScreen(selectedDay);
+          swapContent(container, html, animate, fillDayOffWeather);
+          return;
+        }
       }
     }
 
