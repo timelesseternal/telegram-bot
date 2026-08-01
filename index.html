@@ -164,11 +164,17 @@
 
     .header-right-block {
       display: flex;
-      flex-direction: row;
-      align-items: center;
+      flex-direction: column;
+      align-items: flex-end;
       gap: 6px;
       flex-shrink: 0;
       padding-left: 10px;
+    }
+    .header-right-top {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
     }
 
     .weather-widget, .theme-btn {
@@ -691,21 +697,21 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: none;
-      border: none;
-      padding: 0 0 16px;
-      margin-bottom: 14px;
-      border-bottom: 1px solid var(--line);
-      width: 100%;
+      background: var(--paper-2);
+      border: 1px solid var(--ink);
+      padding: 8px 12px;
+      margin-bottom: 16px;
       font-family: var(--font-mono);
       font-size: 0.72rem;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.05em;
-      color: var(--ink-soft);
+      color: var(--ink);
       cursor: pointer;
-      transition: color 0.15s ease;
+      border-radius: 2px;
+      transition: transform 0.15s ease, background-color 0.15s ease, color 0.15s ease;
     }
-    .back-link:active { color: var(--accent); }
+    .back-link:active { transform: scale(0.96); background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after {
@@ -760,8 +766,10 @@
         <span class="live-lesson-badge" id="liveLessonBadge"><span class="live-dot"></span><span>Идёт пара…</span></span>
       </div>
       <div class="header-right-block">
-        <button class="today-btn" id="todayBtn" onclick="jumpToToday()" aria-label="Перейти к сегодняшнему дню">← сегодня</button>
-        <button class="theme-btn" id="themeBtn" onclick="openAccentModal()" aria-label="Выбрать акцентный цвет"></button>
+        <div class="header-right-top">
+          <button class="today-btn" id="todayBtn" onclick="jumpToToday()" aria-label="Перейти к сегодняшнему дню">← сегодня</button>
+          <button class="theme-btn" id="themeBtn" onclick="openAccentModal()" aria-label="Выбрать акцентный цвет"></button>
+        </div>
         <span class="weather-widget" id="weatherWidget" onclick="openCityModal()" role="button" aria-label="Выбрать город для погоды">— · —°</span>
       </div>
     </div>
@@ -1061,7 +1069,7 @@
     { id: 'butter', name: 'Масло', hex: '#F2D06B', text: '#1E2530' },
     { id: 'olive', name: 'Олива', hex: '#4C511F', text: '#FFFFFF' },
     { id: 'mocha', name: 'Мокко', hex: '#9C7A66', text: '#FFFFFF' },
-    { id: 'ultraviolet', name: 'Ультрафиолет', hex: '#5B3FA8', text: '#FFFFFF' }
+    { id: 'petrol', name: 'Нефть', hex: '#2B4C59', text: '#FFFFFF' }
   ];
   const ACCENT_CSS_PROPS = ['--accent', '--accent-text', '--accent-rgb', '--highlight-border', '--highlight-bg', '--progress-bg', '--accent-tint-strong', '--accent-tint-soft'];
   let currentAccentId = 'default';
