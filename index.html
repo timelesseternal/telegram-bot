@@ -173,6 +173,13 @@
       text-overflow: ellipsis;
       transition: opacity 0.25s ease;
     }
+    @keyframes livePulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .live-lesson-badge.pulse-live {
+      animation: livePulse 1.6s ease-in-out infinite;
+    }
 
     .header-right-block {
       display: flex;
@@ -210,7 +217,7 @@
       position: relative;
       border: none;
       border-radius: 14px;
-      padding: 14px 6px 10px;
+      padding: 12px 6px;
       cursor: pointer;
       font-weight: 700;
       font-size: 0.72rem;
@@ -222,7 +229,7 @@
     .accent-swatch-check {
       display: block;
       font-size: 0.9rem;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       opacity: 0;
     }
     .accent-swatch.selected .accent-swatch-check { opacity: 1; }
@@ -235,7 +242,7 @@
       font-size: 0.62rem;
       font-weight: 500;
       opacity: 0.7;
-      margin-top: 2px;
+      margin-top: 3px;
     }
 
     .accent-default-btn {
@@ -272,7 +279,7 @@
       font-weight: 600;
       color: var(--accent-text);
       background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
-      padding: 6px 9px;
+      padding: 5px 10px;
       border-radius: 12px;
       border: none;
       cursor: pointer;
@@ -330,7 +337,7 @@
     .modal-title {
       font-size: 1rem;
       font-weight: 700;
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       color: var(--text-main);
     }
 
@@ -343,7 +350,7 @@
       border-radius: 12px;
       font-size: 0.95rem;
       outline: none;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
       cursor: pointer;
     }
 
@@ -460,8 +467,8 @@
       position: relative;
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 4px;
-      margin-bottom: 14px;
+      gap: 6px;
+      margin-bottom: 12px;
     }
 
     .day-indicator {
@@ -508,18 +515,23 @@
       grid-column: 1 / -1;
       text-align: center;
       padding: 10px 0;
+      margin-top: 6px;
       border-radius: 14px;
       font-weight: 700;
       font-size: 0.85rem;
       background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
       color: var(--accent-text);
       box-shadow: 0 4px 16px rgba(var(--accent-rgb), 0.35), inset 0 1px 0 rgba(255,255,255,0.35);
-      display: none;
       position: relative;
       z-index: 1;
+      display: none;
+      opacity: 0;
+      transform: scale(0.94) translateY(-4px);
+      transition: opacity 0.25s ease, transform 0.25s cubic-bezier(0.4,0,0.2,1);
     }
     .weekend-badge.active {
-      display: block;
+      opacity: 1;
+      transform: scale(1) translateY(0);
     }
 
     .day-btn.umkd-btn {
@@ -575,6 +587,13 @@
       overflow: hidden;
     }
     .card:active { transform: scale(0.99); }
+    @keyframes cardEnter {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .card.card-enter {
+      animation: cardEnter 0.35s cubic-bezier(0.4,0,0.2,1) both;
+    }
 
     .card.current-active {
       border: 1.5px solid var(--highlight-border);
@@ -648,7 +667,7 @@
     .badge-type {
       display: inline-block;
       margin-top: 8px;
-      padding: 3px 8px;
+      padding: 4px 8px;
       border-radius: 6px;
       font-size: 0.72rem;
       font-weight: 600;
@@ -722,6 +741,8 @@
       color: var(--accent);
       font-weight: 700;
       border-color: var(--glass-border);
+      padding: 8px 14px;
+      margin-bottom: 12px;
     }
     .back-btn.accent-back:active {
       background: linear-gradient(180deg, rgba(255,255,255,0.28), rgba(255,255,255,0)), var(--accent);
@@ -734,6 +755,9 @@
       color: var(--text-muted);
       font-size: 0.95rem;
     }
+    .empty-state.compact {
+      padding: 24px 10px;
+    }
 
     .day-off-card {
       text-align: center;
@@ -744,6 +768,14 @@
       font-size: 2.5rem;
       margin-bottom: 6px;
       line-height: 1;
+    }
+    @keyframes emojiPop {
+      0% { transform: scale(0.4); opacity: 0; }
+      60% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .day-off-emoji.emoji-pop {
+      animation: emojiPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
     }
 
     .day-off-title {
@@ -1525,13 +1557,14 @@
     `;
   }
 
-  function buildDayOffScreen(dayName) {
+  function buildDayOffScreen(dayName, animateEntrance = true) {
     const hint = getUpcomingHintFromDate(getTomorrowDate());
     const isActuallyToday = dayName === realTodayName && currentMode === 'current';
     const title = isActuallyToday ? 'Сегодня без пар' : `${dayName}: пар нет`;
+    const emojiClass = animateEntrance ? 'day-off-emoji emoji-pop' : 'day-off-emoji';
     return `
       <div class="card day-off-card">
-        <div class="day-off-emoji">🎉</div>
+        <div class="${emojiClass}">🎉</div>
         <div class="day-off-title">${title}</div>
         <div class="day-off-weather" id="dayOffWeatherDetail">
           ${weatherSkeletonHtml()}
@@ -1544,11 +1577,12 @@
 
   // Экран, который показывается, когда все пары на сегодня закончились
   // (плюс 30 минут буфера) — визуально как "выходной", но с другим текстом.
-  function buildDayFinishedScreen(dayName) {
+  function buildDayFinishedScreen(dayName, animateEntrance = true) {
     const hint = getUpcomingHintFromDate(getTomorrowDate());
+    const emojiClass = animateEntrance ? 'day-off-emoji emoji-pop' : 'day-off-emoji';
     return `
       <div class="card day-off-card">
-        <div class="day-off-emoji">✅</div>
+        <div class="${emojiClass}">✅</div>
         <div class="day-off-title">${dayName}: пары закончились</div>
         <div class="day-off-weather" id="dayOffWeatherDetail">
           ${weatherSkeletonHtml()}
@@ -1597,11 +1631,32 @@
 
   // Показывает плашку "Сегодня выходной" вместо подсветки дня, когда у
   // реального сегодняшнего дня (ПТ/СБ/ВС) нет своей кнопки в сетке.
+  let weekendBadgeHideTimer = null;
+
   function updateWeekendBadge() {
     const badge = document.getElementById('weekendBadge');
     if (!badge) return;
     const hasOwnButton = ['Понедельник', 'Вторник', 'Среда', 'Четверг'].includes(realTodayName);
-    badge.classList.toggle('active', !hasOwnButton);
+    const shouldShow = !hasOwnButton;
+
+    if (weekendBadgeHideTimer) {
+      clearTimeout(weekendBadgeHideTimer);
+      weekendBadgeHideTimer = null;
+    }
+
+    if (shouldShow) {
+      if (badge.style.display !== 'block') {
+        badge.style.display = 'block';
+        void badge.offsetWidth; // force reflow so the transition actually plays
+      }
+      badge.classList.add('active');
+    } else {
+      badge.classList.remove('active');
+      weekendBadgeHideTimer = setTimeout(() => {
+        badge.style.display = 'none';
+        weekendBadgeHideTimer = null;
+      }, 260);
+    }
   }
 
   function getShortDayName(fullDay) {
@@ -1643,6 +1698,7 @@
 
     if (!dayHasClasses(realTodayName)) {
       badgeEl.innerHTML = '🌴 Сегодня без пар';
+      badgeEl.classList.remove('pulse-live');
       return;
     }
 
@@ -1684,6 +1740,7 @@
     } else {
       badgeEl.innerHTML = `🎉 Пары на сегодня всё`;
     }
+    badgeEl.classList.toggle('pulse-live', !!currentParaNum);
   }
 
   function jumpToToday() {
@@ -1740,6 +1797,8 @@
     updateStatusBarAndLive();
   }
 
+  let lastRenderedScreenKey = '';
+
   function renderSchedule(animate = true) {
     const container = document.getElementById('scheduleContainer');
     const currentWeekType = getWeekType();
@@ -1756,17 +1815,27 @@
       const now = new Date();
       const nowMins = now.getHours() * 60 + now.getMinutes();
       if (lastEndMins !== null && nowMins > lastEndMins + 30) {
-        const html = buildDayFinishedScreen(selectedDay);
+        const screenKey = `${selectedDay}|${currentMode}|finished`;
+        const animateEntrance = screenKey !== lastRenderedScreenKey;
+        lastRenderedScreenKey = screenKey;
+        const html = buildDayFinishedScreen(selectedDay, animateEntrance);
         swapContent(container, html, animate, fillDayOffWeather);
         return;
       }
     }
 
     if (filteredLessons.length === 0) {
-      const html = buildDayOffScreen(selectedDay);
+      const screenKey = `${selectedDay}|${currentMode}|off`;
+      const animateEntrance = screenKey !== lastRenderedScreenKey;
+      lastRenderedScreenKey = screenKey;
+      const html = buildDayOffScreen(selectedDay, animateEntrance);
       swapContent(container, html, animate, fillDayOffWeather);
       return;
     }
+
+    const screenKey = `${selectedDay}|${currentMode}|schedule`;
+    const animateCardsEntrance = screenKey !== lastRenderedScreenKey;
+    lastRenderedScreenKey = screenKey;
 
     const now = new Date();
     const currentMins = now.getHours() * 60 + now.getMinutes() + now.getSeconds() / 60;
@@ -1792,14 +1861,19 @@
     }
 
     let html = '';
-    filteredLessons.forEach(item => {
+    filteredLessons.forEach((item, index) => {
       let typeBadge = '';
       if (item.type === 1) typeBadge = '<span class="badge-type type-1">Числитель</span>';
       else if (item.type === 2) typeBadge = '<span class="badge-type type-2">Знаменатель</span>';
       else typeBadge = '<span class="badge-type type-0">Каждую неделю</span>';
 
       const isActive = (item.пара === activeParaNow);
-      const cardClass = isActive ? 'card current-active' : 'card';
+      let cardClass = isActive ? 'card current-active' : 'card';
+      let cardStyle = '';
+      if (animateCardsEntrance) {
+        cardClass += ' card-enter';
+        cardStyle = ` style="animation-delay: ${Math.min(index, 6) * 0.06}s;"`;
+      }
 
       let progressBarHtml = '';
       if (isActive) {
@@ -1811,7 +1885,7 @@
       }
 
       html += `
-        <div class="${cardClass}">
+        <div class="${cardClass}"${cardStyle}>
           <div class="card-header">
             <span class="para-num">Пара №${item.пара} ${isActive ? '⚡ (Идет сейчас)' : ''}</span>
             <span class="time-badge">🕐 ${getTime(item.пара)}</span>
@@ -1852,7 +1926,7 @@
 
   function renderUmkdSubjects() {
     const container = document.getElementById('scheduleContainer');
-    let html = '<button class="back-btn accent-back" style="margin-bottom: 12px; padding: 8px 14px;" onclick="switchWeek(\'current\')">← Назад к расписанию</button>';
+    let html = '<button class="back-btn accent-back" onclick="switchWeek(\'current\')">← Назад к расписанию</button>';
 
     for (const subject of Object.keys(UMKD_FILES)) {
       html += `
@@ -1873,7 +1947,7 @@
 
     let filesHtml = '';
     if (files.length === 0) {
-      filesHtml = '<div class="empty-state" style="padding: 24px 10px;">📭 Файлы пока не загружены</div>';
+      filesHtml = '<div class="empty-state compact">📭 Файлы пока не загружены</div>';
     } else {
       files.forEach(file => {
         filesHtml += `
@@ -1886,9 +1960,9 @@
     }
 
     const html = `
-      <button class="back-btn accent-back" style="margin-bottom: 12px; padding: 8px 14px;" onclick="renderUmkdSubjects()">← Назад к списку дисциплин</button>
+      <button class="back-btn accent-back" onclick="renderUmkdSubjects()">← Назад к списку дисциплин</button>
       <div class="card">
-        <div class="subject-title" style="font-size: 1.05rem; margin-bottom: 10px;">📚 ${subjectName}</div>
+        <div class="subject-title">📚 ${subjectName}</div>
         <div style="margin-top: 8px;">
           ${filesHtml}
         </div>
